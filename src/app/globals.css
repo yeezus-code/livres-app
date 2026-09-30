@@ -1,0 +1,457 @@
+/* ==========================================================================
+   Couleurs et réglages généraux — changer une valeur ici la change partout
+   ========================================================================== */
+:root {
+  --teal-900: #0b3b3c;
+  --teal-700: #0f6b6b;
+  --teal-600: #13807f;
+  --teal-100: #d7eeec;
+  --teal-50: #eef7f6;
+
+  --bg: #f5f9f9;
+  --surface: #ffffff;
+  --text: #16302f;
+  --muted: #5b7371;
+  --border: #d5e3e1;
+  --star: #e0a526;
+  --danger: #b3261e;
+
+  --radius: 10px;
+  --shadow: 0 1px 3px rgb(11 59 60 / 0.08), 0 4px 12px rgb(11 59 60 / 0.06);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-title: Georgia, "Times New Roman", serif;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--teal-700);
+}
+
+h1,
+h2 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--teal-600);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Utilitaires
+   ========================================================================== */
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+.center { text-align: center; }
+.error { color: var(--danger); }
+.spacer { flex: 1; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   En-tête
+   ========================================================================== */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--teal-700);
+  color: #fff;
+}
+
+.header__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo {
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.nav__link {
+  color: var(--teal-100);
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+}
+
+.nav__link:hover { color: #fff; }
+
+@media (max-width: 480px) {
+  .logo { font-size: 1.15rem; }
+  .nav__link { padding: 0.35rem 0.6rem; font-size: 0.95rem; }
+}
+
+.nav__link[aria-current="page"] {
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
+}
+
+/* ==========================================================================
+   Mise en page
+   ========================================================================== */
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.page-head .page-title { margin-bottom: 0.5rem; }
+
+.page-title {
+  font-size: 1.6rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.count {
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.banner {
+  background: var(--teal-50);
+  border: 1px solid var(--teal-100);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+}
+
+.banner--error {
+  background: #fdf1f0;
+  border-color: #f2c9c6;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* ==========================================================================
+   Boutons et champs
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* taille confortable au doigt */
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:disabled { opacity: 0.6; cursor: default; }
+
+.btn--primary { background: var(--teal-700); color: #fff; }
+.btn--primary:hover:not(:disabled) { background: var(--teal-900); }
+
+.btn--ghost { background: var(--surface); color: var(--teal-700); border-color: var(--border); }
+.btn--ghost:hover:not(:disabled) { background: var(--teal-50); }
+
+.btn--danger { background: none; color: var(--danger); border-color: #f2c9c6; }
+
+.search input,
+.field textarea,
+.sort select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.search input {
+  font-size: 1.1rem;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.sort select { width: auto; padding: 0.5rem 0.75rem; min-height: 44px; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border: 0;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.field > span,
+.field legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+
+.field textarea {
+  padding: 0.75rem;
+  resize: vertical;
+}
+
+/* ==========================================================================
+   Couvertures
+   ========================================================================== */
+.cover {
+  display: block;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--teal-100);
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+}
+
+.cover--sm { width: 64px; }
+.cover--md { width: 100%; }
+
+.cover--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  background: linear-gradient(160deg, var(--teal-600), var(--teal-900));
+  color: #fff;
+  font-family: var(--font-title);
+  text-align: center;
+  overflow: hidden;
+}
+
+.cover--empty span {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.cover--sm.cover--empty { font-size: 0.6rem; }
+.cover--md.cover--empty { font-size: 0.95rem; }
+
+/* ==========================================================================
+   Résultats de recherche
+   ========================================================================== */
+.results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  box-shadow: var(--shadow);
+}
+
+.result__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.result__info p { margin: 0.1rem 0; }
+
+.result__title {
+  font-size: 1.05rem;
+  margin: 0 0 0.15rem;
+  overflow-wrap: anywhere;
+}
+
+.in-library {
+  color: var(--teal-700);
+  font-weight: 600;
+}
+
+/* Sur petit écran, le bouton passe sous le texte */
+@media (max-width: 480px) {
+  .result { flex-wrap: wrap; align-items: flex-start; }
+  .result__info { flex-basis: calc(100% - 80px); }
+  .result .btn { width: 100%; }
+}
+
+/* ==========================================================================
+   Bibliothèque (grille de couvertures)
+   ========================================================================== */
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1.25rem 1rem;
+}
+
+@media (max-width: 480px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tile .cover { margin-bottom: 0.4rem; transition: transform 0.15s; }
+.tile:hover .cover { transform: translateY(-2px); }
+
+.tile__title {
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tile__author { font-size: 0.875rem; color: var(--muted); }
+
+.tile__review {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Étoiles
+   ========================================================================== */
+.stars { white-space: nowrap; letter-spacing: 1px; }
+.star { color: var(--border); }
+.star--on { color: var(--star); }
+
+.star-input {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.star-input .star {
+  font-size: 2rem;
+  line-height: 1;
+  background: none;
+  border: 0;
+  padding: 0.15rem;
+  cursor: pointer;
+}
+
+.star-input__hint {
+  margin-left: 0.6rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   Fenêtre d'ajout / modification
+   ========================================================================== */
+.dialog {
+  width: min(520px, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  border: 0;
+  border-radius: 14px;
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 10px 40px rgb(11 59 60 / 0.25);
+}
+
+.dialog::backdrop { background: rgb(11 59 60 / 0.45); }
+
+.dialog__body { padding: 1.25rem; }
+
+.dialog__book {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.dialog__book p { margin: 0.1rem 0; }
+
+.dialog__title {
+  font-size: 1.2rem;
+  margin: 0 0 0.25rem;
+}
+
+.dialog__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,72 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import type { Book } from "@/lib/books";
+import { entryToBook } from "@/lib/library";
+import { BookCover } from "@/components/BookCover";
+import { BookDialog } from "@/components/BookDialog";
+import { useLibrary } from "@/components/LibraryProvider";
+import { Stars } from "@/components/StarRating";
+
+type Sort = "recent" | "rating" | "title";
+
+export default function LibraryPage() {
+  const { status, entries } = useLibrary();
+  const [sort, setSort] = useState<Sort>("recent");
+  const [selected, setSelected] = useState<Book | null>(null);
+
+  const sorted = useMemo(() => {
+    const list = [...entries];
+    if (sort === "rating") list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    if (sort === "title") list.sort((a, b) => a.title.localeCompare(b.title, "fr"));
+    return list; // « recent » : déjà dans l'ordre d'ajout
+  }, [entries, sort]);
+
+  if (status !== "ready") return null; // le bandeau d'état s'affiche au-dessus
+
+  return (
+    <>
+      <div className="page-head">
+        <h1 className="page-title">
+          Ma bibliothèque <span className="muted count">{entries.length}</span>
+        </h1>
+        {entries.length > 1 && (
+          <label className="sort">
+            <span className="visually-hidden">Trier par</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
+              <option value="recent">Ajout récent</option>
+              <option value="rating">Meilleure note</option>
+              <option value="title">Titre (A→Z)</option>
+            </select>
+          </label>
+        )}
+      </div>
+
+      {entries.length === 0 ? (
+        <div className="empty">
+          <p>Votre bibliothèque est vide pour l&apos;instant.</p>
+          <Link href="/" className="btn btn--primary">
+            Rechercher un livre
+          </Link>
+        </div>
+      ) : (
+        <ul className="grid">
+          {sorted.map((entry) => (
+            <li key={entry.id}>
+              <button className="tile" onClick={() => setSelected(entryToBook(entry))}>
+                <BookCover src={entry.cover_url} title={entry.title} />
+                <span className="tile__title">{entry.title}</span>
+                {entry.authors[0] && <span className="tile__author">{entry.authors[0]}</span>}
+                <Stars value={entry.rating} />
+                {entry.review && <span className="tile__review">« {entry.review} »</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <BookDialog book={selected} onClose={() => setSelected(null)} />
+    </>
+  );
+}
