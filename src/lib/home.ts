@@ -28,6 +28,20 @@ export function statsToBook(s: BookStats): Book {
   };
 }
 
+/** Ce que les lecteurs de l'application pensent d'un livre (null si personne ne l'a lu). */
+export async function fetchBookStats(
+  supabase: SupabaseClient,
+  bookId: string,
+): Promise<BookStats | null> {
+  const { data, error } = await supabase
+    .from("book_stats")
+    .select("*")
+    .eq("book_id", bookId)
+    .maybeSingle();
+  if (error) throw error;
+  return data as BookStats | null;
+}
+
 /** Les mieux notés par les lecteurs de l'application. */
 export async function fetchBestRated(supabase: SupabaseClient): Promise<BookStats[]> {
   const { data, error } = await supabase

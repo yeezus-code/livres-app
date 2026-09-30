@@ -3,11 +3,13 @@
 
 import { useState } from "react";
 
-type Props = { src: string | null; title: string; size?: "sm" | "md" };
+type Props = { src: string | null; title: string; size?: "sm" | "md" | "lg" };
 
 /** Couverture du livre, ou une couverture de remplacement avec le titre. */
-export function BookCover({ src, title, size = "md" }: Props) {
+export function BookCover({ src: rawSrc, title, size = "md" }: Props) {
   const [failed, setFailed] = useState(false);
+  // Grande couverture : on demande la version haute définition à Open Library
+  const src = size === "lg" && rawSrc ? rawSrc.replace(/-M\.jpg$/, "-L.jpg") : rawSrc;
 
   if (!src || failed) {
     return (

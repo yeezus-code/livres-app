@@ -6,7 +6,7 @@ import { entryToBook, formatDate, isRead, type LibraryEntry } from "@/lib/librar
 import type { Book } from "@/lib/books";
 import { profileHref, type Profile } from "@/lib/social";
 import { Avatar } from "./Avatar";
-import { BookCover } from "./BookCover";
+import { BookHeader } from "./BookHeader";
 import { LikeButton } from "./LikeButton";
 import { useLibrary } from "./LibraryProvider";
 import { Stars } from "./StarRating";
@@ -48,16 +48,7 @@ export function EntryDialog({
     >
       {entry && (
         <div className="dialog__body">
-          <div className="dialog__book">
-            <BookCover src={entry.cover_url} title={entry.title} size="sm" />
-            <div>
-              <h2 className="dialog__title">{entry.title}</h2>
-              {entry.authors.length > 0 && <p className="muted">{entry.authors.join(", ")}</p>}
-              <p className="small muted">
-                {[entry.year, ...entry.genres].filter(Boolean).join(" · ")}
-              </p>
-            </div>
-          </div>
+          <BookHeader book={entryToBook(entry)} />
 
           {author && (
             <p className="small muted with-avatar">

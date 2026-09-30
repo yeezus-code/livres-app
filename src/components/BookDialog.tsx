@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Book } from "@/lib/books";
 import { toFrenchMessage } from "@/lib/account";
 import { isRead, today, type EntryStatus } from "@/lib/library";
-import { BookCover } from "./BookCover";
+import { BookHeader } from "./BookHeader";
 import { useLibrary } from "./LibraryProvider";
 import { StarInput } from "./StarRating";
 
@@ -83,14 +83,7 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
         run(() => save(book, { status, rating, review, readOn }));
       }}
     >
-      <div className="dialog__book">
-        <BookCover src={book.coverUrl} title={book.title} size="sm" />
-        <div>
-          <h2 className="dialog__title">{book.title}</h2>
-          {book.authors.length > 0 && <p className="muted">{book.authors.join(", ")}</p>}
-          {book.year && <p className="muted small">{book.year}</p>}
-        </div>
-      </div>
+      <BookHeader book={book} />
 
       <div className="tabs tabs--choice" role="radiogroup" aria-label="Où ranger ce livre">
         <button

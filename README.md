@@ -234,6 +234,19 @@ cliquez **Run**.
   `https://nouvelle-adresse/**` dans *Redirect URLs*. Sinon, les liens des e-mails mèneront
   à l'ancienne adresse.
 
+### Recevoir les messages envoyés à contact@codexby.app
+
+L'adresse de contact affichée sur le site (`src/lib/site.ts`) doit pouvoir recevoir des
+e-mails. Le plus simple, gratuit : une **redirection** vers votre boîte Gmail avec ImprovMX.
+
+1. <https://improvmx.com> → saisissez `codexby.app` et votre adresse Gmail → créez le compte.
+2. ImprovMX affiche 2 lignes `MX` (`mx1.improvmx.com` priorité 10, `mx2.improvmx.com`
+   priorité 20) et 1 ligne `TXT` (`v=spf1 include:spf.improvmx.com ~all`). Ajoutez-les dans
+   Vercel → **Domains** → `codexby.app` → **DNS Records**, avec un *Name* **vide** (ou `@`).
+   Ces lignes ne gênent pas celles de Resend, qui sont sur `send`.
+3. Cliquez **Check again** dans ImprovMX, puis envoyez-vous un e-mail de test à
+   contact@codexby.app.
+
 > Sans compte, la bibliothèque est liée au navigateur. En se connectant sur un appareil où
 > des livres avaient été ajoutés sans compte, ces livres sont copiés dans le compte.
 

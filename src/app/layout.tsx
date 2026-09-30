@@ -10,8 +10,20 @@ import "@fontsource-variable/inter";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: `${SITE.name} — ${SITE.tagline}`,
   description: SITE.description,
+  applicationName: SITE.name,
+  // Aperçu affiché quand on partage un lien (WhatsApp, iMessage, réseaux sociaux…)
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: SITE.name,
+    title: `${SITE.name} — ${SITE.tagline}`,
+    description: SITE.description,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: SITE.name }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
 };
 
 export const viewport: Viewport = {

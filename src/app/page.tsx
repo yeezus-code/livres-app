@@ -61,50 +61,98 @@ export default function HomePage() {
   }, [status]);
 
   const readCount = entries.filter(isRead).length;
+  const heroCovers = (classics ?? []).filter((b) => b.coverUrl).slice(0, 3);
   const hasCommunity =
     community && (community.best.length || community.popular.length || community.reviews.length);
 
   return (
     <>
       <section className="hero">
-        <p className="hero__eyebrow">{SITE.name} · carnet de lecture</p>
-        <h1 className="hero__title">
-          {account?.username ? (
-            <>
-              Bonjour <em>@{account.username}</em>
-            </>
-          ) : (
-            <>
-              Vos lectures, vos notes, <em>vos avis</em>.
-            </>
-          )}
-        </h1>
-        <p className="hero__text">
-          {readCount > 0
-            ? `${readCount} livre${readCount > 1 ? "s" : ""} lu${readCount > 1 ? "s" : ""}. Que lisez-vous en ce moment ?`
-            : "Retrouvez un livre, donnez-lui une note sur 5, gardez une trace de ce que vous en avez pensé."}
-        </p>
-        <form
-          className="hero__search"
-          role="search"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (query.trim()) router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
-          }}
-        >
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher un livre par son titre"
-            aria-label="Titre du livre"
-            enterKeyHint="search"
-          />
-          <button type="submit" className="btn btn--primary">
-            Chercher
-          </button>
-        </form>
+        <div className="hero__content">
+          <p className="hero__eyebrow">{SITE.name} · carnet de lecture</p>
+          <h1 className="hero__title">
+            {account?.username ? (
+              <>
+                Bonjour <em>@{account.username}</em>
+              </>
+            ) : (
+              <>
+                Vos lectures, vos notes, <em>vos avis</em>.
+              </>
+            )}
+          </h1>
+          <p className="hero__text">
+            {readCount > 0
+              ? `${readCount} livre${readCount > 1 ? "s" : ""} lu${readCount > 1 ? "s" : ""}. Que lisez-vous en ce moment ?`
+              : "Retrouvez un livre, donnez-lui une note sur 5, gardez une trace de ce que vous en avez pensé."}
+          </p>
+          <form
+            className="hero__search"
+            role="search"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (query.trim()) router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
+            }}
+          >
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher un livre par son titre"
+              aria-label="Titre du livre"
+              enterKeyHint="search"
+            />
+            <button type="submit" className="btn btn--primary">
+              Chercher
+            </button>
+          </form>
+        </div>
+
+        {/* Trois couvertures en éventail (grands écrans seulement) */}
+        {heroCovers.length === 3 && (
+          <div className="hero__visual" aria-hidden="true">
+            {heroCovers.map((book) => (
+              <div key={book.id} className="hero__book">
+                <BookCover src={book.coverUrl} title={book.title} />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
+
+      {!account?.username && (
+        <section className="home-section how">
+          <h2 className="section-title">Comment ça marche</h2>
+          <ol className="how__steps">
+            <li>
+              <span className="how__num">1</span>
+              <strong>Retrouvez vos livres</strong>
+              <span className="muted">
+                Tapez un titre : couverture, auteur et genre s&apos;affichent tout seuls.
+              </span>
+            </li>
+            <li>
+              <span className="how__num">2</span>
+              <strong>Notez et racontez</strong>
+              <span className="muted">
+                Une note sur 5, un avis, la date de lecture, votre liste « À lire » et votre top.
+              </span>
+            </li>
+            <li>
+              <span className="how__num">3</span>
+              <strong>Partagez</strong>
+              <span className="muted">
+                Votre profil public, les lectures de vos amis, les avis qu&apos;on aime.
+              </span>
+            </li>
+          </ol>
+          <p className="center">
+            <Link href="/compte" className="btn btn--primary">
+              Créer mon carnet — c&apos;est gratuit
+            </Link>
+          </p>
+        </section>
+      )}
 
       <section className="home-section">
         <h2 className="section-title">Les grands classiques</h2>
@@ -156,7 +204,7 @@ export default function HomePage() {
       )}
 
       {community && community.reviews.length > 0 && (
-        <section className="home-section">
+        <section className="home-section band">
           <h2 className="section-title">Derniers avis</h2>
           <ul className="reviews">
             {community.reviews.map((r) => (

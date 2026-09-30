@@ -5,5 +5,6 @@ export const SITE = {
   description:
     "Codex est un carnet de lecture en ligne : retrouvez un livre, donnez-lui une note sur 5, " +
     "écrivez ce que vous en avez pensé, composez votre top et suivez les lectures de vos amis.",
-  contactEmail: "mybookapp93@gmail.com",
+  contactEmail: "contact@codexby.app",
+  url: "https://codexby.app",
 };
