@@ -128,7 +128,21 @@ function shortTitle(title: string, max: number) {
 }
 
 /** Une étagère : les couvertures posées sur une planche dorée (dessinée derrière les numéros). */
-function Shelf({ items, width, gap, badge, titles }: { items: Placed[]; width: (rank: number) => number; gap: number; badge: number; titles: boolean }) {
+function Shelf({
+  items,
+  width,
+  gap,
+  badge,
+  titles = false,
+  titleSize = 22,
+}: {
+  items: Placed[];
+  width: (rank: number) => number;
+  gap: number;
+  badge: number;
+  titles?: boolean;
+  titleSize?: number;
+}) {
   const rowHeight = Math.max(...items.map((item) => Math.round(width(item.rank) * 1.5)));
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", width: 940 }}>
@@ -162,12 +176,12 @@ function Shelf({ items, width, gap, badge, titles }: { items: Placed[]; width: (
                 color: PAPER,
                 fontFamily: "Inter",
                 fontWeight: 600,
-                fontSize: 22,
+                fontSize: titleSize,
                 lineHeight: 1.3,
                 textAlign: "center",
               }}
             >
-              {shortTitle(item.book.title, Math.round(width(item.rank) / 6.5))}
+              {shortTitle(item.book.title, Math.round((width(item.rank) / titleSize) * 3.4))}
             </div>
           ))}
         </div>
@@ -196,7 +210,7 @@ export async function GET(request: Request) {
   const rest = placed.slice(3);
   // Sans seconde étagère, le podium a toute la place
   const podiumWidth = (rank: number) =>
-    rest.length ? (rank === 1 ? 250 : 200) : rank === 1 ? 310 : 250;
+    !rest.length ? (rank === 1 ? 310 : 250) : rank === 1 ? 236 : 190;
   const restGap = 18;
   const restWidth = Math.min(150, Math.floor((900 - restGap * (rest.length - 1)) / Math.max(rest.length, 1)));
 
@@ -241,10 +255,10 @@ export async function GET(request: Request) {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 70 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 50 }}>
           <Shelf items={podiumOrder} width={podiumWidth} gap={34} badge={64} titles />
           {rest.length > 0 && (
-            <Shelf items={rest} width={() => restWidth} gap={restGap} badge={44} titles={false} />
+            <Shelf items={rest} width={() => restWidth} gap={restGap} badge={44} titles titleSize={16} />
           )}
         </div>
 
