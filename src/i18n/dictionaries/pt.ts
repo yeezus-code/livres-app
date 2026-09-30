@@ -178,7 +178,7 @@ export const pt: Dictionary = {
     wantToRead: "☆ Quero ler",
     yourRating: "Sua nota",
     readOnLabel: "Lido em",
-    readOnHint: "Opcional: deixe em branco se não lembrar.",
+    dateUnknown: "Não lembro",
     yourReview: "Sua resenha",
     reviewPlaceholder: "O que você achou… (opcional)",
     toReadInfo: "O livro vai para a sua lista “Quero ler”. Quando terminar, abra-o de novo para dar sua nota.",

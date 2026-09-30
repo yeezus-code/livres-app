@@ -178,7 +178,7 @@ export const en: Dictionary = {
     wantToRead: "☆ I want to read it",
     yourRating: "Your rating",
     readOnLabel: "Read on",
-    readOnHint: "Optional: leave empty if you don't remember.",
+    dateUnknown: "I don't remember",
     yourReview: "Your review",
     reviewPlaceholder: "What you thought of it… (optional)",
     toReadInfo: "The book goes into your to-read list. Once you've read it, open it again to rate it.",

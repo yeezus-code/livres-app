@@ -183,7 +183,7 @@ export const fr = {
     wantToRead: "☆ Je veux le lire",
     yourRating: "Votre note",
     readOnLabel: "Lu le",
-    readOnHint: "Facultatif : laissez vide si vous ne savez plus.",
+    dateUnknown: "Je ne sais plus",
     yourReview: "Votre avis",
     reviewPlaceholder: "Ce que vous en avez pensé… (facultatif)",
     toReadInfo:

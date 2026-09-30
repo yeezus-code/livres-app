@@ -50,6 +50,10 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
   const [readOn, setReadOn] = useState(
     existing && isRead(existing) ? (existing.read_on ?? "") : today(),
   );
+  // « Je ne sais plus » : livre déjà lu, enregistré sans date
+  const [dateUnknown, setDateUnknown] = useState(
+    Boolean(existing && isRead(existing) && !existing.read_on),
+  );
   // Couverture choisie par le lecteur (celle déjà enregistrée, sinon celle trouvée par la recherche)
   const [cover, setCover] = useState(existing?.cover_url ?? book.coverUrl);
   const [pickingCover, setPickingCover] = useState(false);
@@ -86,7 +90,7 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
       className="dialog__body"
       onSubmit={(e) => {
         e.preventDefault();
-        run(() => save({ ...book, coverUrl: cover }, { status, rating, review, readOn }));
+        run(() => save({ ...book, coverUrl: cover }, { status, rating, review, readOn: dateUnknown ? "" : readOn }));
       }}
     >
       <BookHeader book={{ ...book, coverUrl: cover }} />
@@ -134,17 +138,30 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
             <StarInput value={rating} onChange={setRating} />
           </fieldset>
 
-          <label className="field">
-            <span>{t.book.readOnLabel}</span>
+          <div className="field">
+            <label htmlFor="read-on">{t.book.readOnLabel}</label>
             <input
+              id="read-on"
               type="date"
-              value={readOn}
+              value={dateUnknown ? "" : readOn}
               max={today()}
               onChange={(e) => setReadOn(e.target.value)}
               className="input-date"
+              disabled={dateUnknown}
             />
-            <small className="muted">{t.book.readOnHint}</small>
-          </label>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={dateUnknown}
+                onChange={(e) => {
+                  setDateUnknown(e.target.checked);
+                  // On décoche : la date du jour est de nouveau proposée
+                  if (!e.target.checked && !readOn) setReadOn(today());
+                }}
+              />
+              {t.book.dateUnknown}
+            </label>
+          </div>
 
           <label className="field">
             <span>{t.book.yourReview}</span>

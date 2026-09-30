@@ -1772,3 +1772,24 @@ p.with-avatar { display: flex; }
 .top-share__actions { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
 .top-share__actions .btn { width: 100%; text-align: center; }
 .top-share-link { margin: 0.5rem 0 1rem; }
+
+/* Date de lecture : case « Je ne sais plus » */
+.field > label:first-child { font-weight: 600; margin-bottom: 0.4rem; }
+.field .check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  min-height: 36px;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+.field .check input {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  accent-color: var(--teal-700);
+}
+.input-date:disabled { opacity: 0.45; }
