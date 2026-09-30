@@ -124,7 +124,98 @@ function Search() {
         </ul>
       )}
 
+      {canAdd && view.kind === "done" && (
+        <ManualBook key={view.title} initialTitle={view.title} onReady={setSelected} />
+      )}
+
       <BookDialog book={selected} onClose={() => setSelected(null)} />
     </>
+  );
+}
+
+/** Identifiant d'un livre ajouté à la main : le même pour tous ceux qui ajoutent ce livre. */
+function manualId(title: string, author: string) {
+  const clean = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  return `manuel:${clean(title)}--${clean(author)}`.slice(0, 200);
+}
+
+/** « Livre introuvable ? » : un petit formulaire pour ajouter un livre absent des sources. */
+function ManualBook({
+  initialTitle,
+  onReady,
+}: {
+  initialTitle: string;
+  onReady: (book: Book) => void;
+}) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(initialTitle);
+  const [author, setAuthor] = useState("");
+  const [year, setYear] = useState("");
+
+  if (!open) {
+    return (
+      <p className="center small manual-link">
+        {t.search.notFound}{" "}
+        <button type="button" className="text-btn" onClick={() => setOpen(true)}>
+          {t.search.addManually}
+        </button>
+      </p>
+    );
+  }
+
+  return (
+    <form
+      className="card manual"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const cleanTitle = title.trim();
+        const cleanAuthor = author.trim();
+        const numericYear = parseInt(year, 10);
+        onReady({
+          id: manualId(cleanTitle, cleanAuthor),
+          title: cleanTitle,
+          authors: cleanAuthor ? [cleanAuthor] : [],
+          coverUrl: null,
+          genres: [],
+          year: Number.isNaN(numericYear) ? null : numericYear,
+        });
+      }}
+    >
+      <h2 className="card__title">{t.search.manualTitle}</h2>
+      <p className="muted small">{t.search.manualIntro}</p>
+      <label className="field">
+        <span>{t.search.manualBookTitle}</span>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={300} />
+      </label>
+      <label className="field">
+        <span>{t.search.manualAuthor}</span>
+        <input value={author} onChange={(e) => setAuthor(e.target.value)} required maxLength={200} />
+      </label>
+      <label className="field">
+        <span>{t.search.manualYear}</span>
+        <input
+          value={year}
+          onChange={(e) => setYear(e.target.value.replace(/\D/g, "").slice(0, 4))}
+          inputMode="numeric"
+          placeholder="2024"
+        />
+      </label>
+      <div className="dialog__actions">
+        <span className="spacer" />
+        <button type="button" className="btn btn--ghost" onClick={() => setOpen(false)}>
+          {t.common.cancel}
+        </button>
+        <button type="submit" className="btn btn--primary">
+          {t.search.manualContinue}
+        </button>
+      </div>
+    </form>
   );
 }

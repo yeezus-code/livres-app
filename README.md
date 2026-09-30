@@ -94,10 +94,12 @@ Si vous avez oublié les variables ou fait une faute de frappe : **Settings** �
 **Environment Variables** pour corriger, puis **Deployments** → menu « ⋯ » du dernier
 déploiement → **Redeploy**.
 
-### Étape 4 (facultative) — Clé Google Books
+### Étape 4 (fortement conseillée) — Clé Google Books
 
-Sans clé, Google Books limite le nombre de recherches par jour ; Open Library reste utilisé
-dans tous les cas, donc la recherche fonctionne quand même. Pour lever la limite :
+Sans clé, Google Books partage un petit quota avec tous les sites hébergés au même endroit :
+il refuse vite de répondre, et la recherche ne s'appuie plus que sur Open Library (beaucoup
+de livres récents ou francophones manquent alors). La clé est gratuite (1 000 recherches par
+jour, et Codex garde chaque recherche en mémoire 1 heure) :
 
 1. <https://console.cloud.google.com> → créez un projet → **APIs & Services** → **Library** →
    cherchez « Books API » → **Enable**.

@@ -77,7 +77,7 @@ export const fr = {
     },
     intro:
       "Retrouvez un livre, donnez-lui une note sur 5, gardez une trace de ce que vous en avez pensé.",
-    searchPlaceholder: "Rechercher un livre par son titre",
+    searchPlaceholder: "Titre ou auteur",
     searchLabel: "Titre du livre",
     searchButton: "Chercher",
     howTitle: "Comment ça marche",
@@ -117,14 +117,22 @@ export const fr = {
 
   search: {
     title: "Rechercher un livre",
-    placeholder: "Titre du livre, ex. L'Étranger",
-    label: "Titre du livre",
-    hint: "Tapez au moins deux lettres du titre.",
+    placeholder: "Titre, auteur ou ISBN",
+    label: "Titre, auteur ou ISBN",
+    hint: "Tapez un titre, un auteur, ou le numéro ISBN au dos du livre.",
     searching: "Recherche…",
     noResult: "Aucun livre trouvé pour « {query} ».",
     inLibrary: "Dans ma bibliothèque ",
     inToRead: "Dans ma liste « À lire »",
     unavailable: "La recherche est momentanément indisponible. Réessayez dans un instant.",
+    notFound: "Livre introuvable ?",
+    addManually: "Ajoutez-le à la main",
+    manualTitle: "Ajouter un livre à la main",
+    manualIntro: "Pour un livre absent de nos sources : il aura une couverture simple avec son titre.",
+    manualBookTitle: "Titre",
+    manualAuthor: "Auteur",
+    manualYear: "Année de parution (facultatif)",
+    manualContinue: "Continuer",
   },
 
   library: {

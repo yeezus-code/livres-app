@@ -1717,3 +1717,7 @@ p.with-avatar { display: flex; }
   font: inherit;
 }
 .lang-picker option { color: #1f2a28; }
+
+/* Recherche : ajout d'un livre à la main */
+.manual-link { margin-top: 1.5rem; }
+.manual { margin-top: 1.5rem; }

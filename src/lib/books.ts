@@ -12,8 +12,9 @@ export type Book = {
   year: number | null;
 };
 
-const TIMEOUT_MS = 6000;
-const MAX_RESULTS = 20;
+// Open Library est parfois lent : on lui laisse un peu de temps avant d'abandonner
+const TIMEOUT_MS = 9000;
+const MAX_RESULTS = 30;
 
 /**
  * Codes de langue attendus par chaque source. Les titres et les couvertures sont pris
@@ -120,11 +121,26 @@ type OpenLibraryDoc = {
 
 const coverFromId = (id: number) => `https://covers.openlibrary.org/b/id/${id}-M.jpg`;
 
-async function searchOpenLibrary(title: string, author: string | undefined, locale: Locale): Promise<Found[]> {
+/**
+ * Ce qu'on cherche : un titre précis (et son auteur) pour les sélections, un texte libre
+ * (titre, auteur, les deux…) pour la page de recherche, ou un numéro ISBN.
+ */
+type Query =
+  | { kind: "title"; title: string; author?: string }
+  | { kind: "text"; text: string }
+  | { kind: "isbn"; isbn: string };
+
+async function searchOpenLibrary(query: Query, locale: Locale): Promise<Found[]> {
   const langs = SOURCE_LANGS[locale];
   const url = new URL("https://openlibrary.org/search.json");
-  url.searchParams.set("title", title);
-  if (author) url.searchParams.set("author", author);
+  if (query.kind === "title") {
+    url.searchParams.set("title", query.title);
+    if (query.author) url.searchParams.set("author", query.author);
+  } else if (query.kind === "isbn") {
+    url.searchParams.set("isbn", query.isbn);
+  } else {
+    url.searchParams.set("q", query.text); // titre, auteur, sujet… n'importe quoi
+  }
   url.searchParams.set(
     "fields",
     "key,title,author_name,first_publish_year,cover_i,subject," +
@@ -178,13 +194,21 @@ function googleCover(links: GoogleVolume["volumeInfo"]["imageLinks"]): string | 
   return raw.replace(/^http:/, "https:").replace("&edge=curl", "");
 }
 
-async function searchGoogleBooks(title: string, author: string | undefined, locale: Locale): Promise<Found[]> {
+async function searchGoogleBooks(query: Query, locale: Locale): Promise<Found[]> {
   const url = new URL("https://www.googleapis.com/books/v1/volumes");
-  url.searchParams.set("q", `intitle:${title}` + (author ? ` inauthor:${author}` : ""));
+  url.searchParams.set(
+    "q",
+    query.kind === "title"
+      ? `intitle:${query.title}` + (query.author ? ` inauthor:${query.author}` : "")
+      : query.kind === "isbn"
+        ? `isbn:${query.isbn}`
+        : query.text,
+  );
   url.searchParams.set("maxResults", String(MAX_RESULTS));
   url.searchParams.set("printType", "books");
-  // Seulement les éditions dans la langue du visiteur (et donc leurs couvertures)
-  url.searchParams.set("langRestrict", SOURCE_LANGS[locale].google);
+  // Sélections : seulement les éditions dans la langue du visiteur (et leurs couvertures).
+  // Recherche libre : toutes les langues, pour ne rater aucun livre.
+  if (query.kind === "title") url.searchParams.set("langRestrict", SOURCE_LANGS[locale].google);
   const key = process.env.GOOGLE_BOOKS_API_KEY;
   if (key) url.searchParams.set("key", key);
 
@@ -245,10 +269,24 @@ export function mergeResults(openLibrary: Found[], google: Found[]): Book[] {
     }));
 }
 
-export async function searchBooks(title: string, author?: string, locale: Locale = "fr"): Promise<Book[]> {
+/** Un titre précis, avec son auteur (sélections, nouveautés choisies à la main). */
+export function searchBooks(title: string, author?: string, locale: Locale = "fr"): Promise<Book[]> {
+  return searchBoth({ kind: "title", title, author }, locale);
+}
+
+/** Recherche tapée par le lecteur : un titre, un auteur, les deux, ou un numéro ISBN. */
+export function searchFreeText(text: string, locale: Locale = "fr"): Promise<Book[]> {
+  const digits = text.replace(/[\s-]/g, "");
+  if (/^(97[89])?\d{9}[\dXx]$/.test(digits)) {
+    return searchBoth({ kind: "isbn", isbn: digits.toUpperCase() }, locale);
+  }
+  return searchBoth({ kind: "text", text }, locale);
+}
+
+async function searchBoth(query: Query, locale: Locale): Promise<Book[]> {
   const [ol, gb] = await Promise.allSettled([
-    searchOpenLibrary(title, author, locale),
-    searchGoogleBooks(title, author, locale),
+    searchOpenLibrary(query, locale),
+    searchGoogleBooks(query, locale),
   ]);
 
   if (ol.status === "rejected") console.error("Open Library :", ol.reason);

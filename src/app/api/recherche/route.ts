@@ -1,7 +1,8 @@
 import { isLocale } from "@/i18n/config";
-import { searchBooks } from "@/lib/books";
+import { searchFreeText } from "@/lib/books";
 
 // GET /api/recherche?titre=dune&lang=en  →  liste de livres au format JSON
+// (« titre » : ce que le lecteur a tapé — titre, auteur, les deux ou un ISBN)
 // (« lang » : langue des titres et des couvertures, français par défaut)
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const books = await searchBooks(title.slice(0, 200), undefined, isLocale(lang) ? lang : "fr");
+    const books = await searchFreeText(title.slice(0, 200), isLocale(lang) ? lang : "fr");
     return Response.json(
       { books },
       // Une même recherche peut être resservie depuis le cache de Vercel pendant 1 h
