@@ -148,7 +148,7 @@ export default function HomePage() {
           </ol>
           <p className="center">
             <Link href="/compte" className="btn btn--primary">
-              Créer mon carnet — c&apos;est gratuit
+              Créer sa bibliothèque
             </Link>
           </p>
         </section>
