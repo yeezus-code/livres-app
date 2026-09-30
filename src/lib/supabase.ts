@@ -4,7 +4,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // Ces deux valeurs viennent du fichier .env.local (en local) ou des
 // « Environment Variables » de Vercel (en ligne). Voir le README.
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+// Nouvelle « publishable key » ou ancienne clé « anon » : les deux fonctionnent.
+const key =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(url && key);
 

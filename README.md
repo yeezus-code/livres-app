@@ -54,8 +54,10 @@ Puis récupérez les deux valeurs dont Vercel aura besoin :
 3. Cliquez sur **Project Settings** (roue dentée en bas à gauche) → **Data API** (ou **API**) :
    copiez la **Project URL** (`https://xxxx.supabase.co`).
 4. **Project Settings** → **API Keys** : copiez la **Publishable key** (elle commence par
-   `sb_publishable_`). Si vous ne voyez que des « Legacy API keys », la clé **anon public**
-   fonctionne aussi.
+   `sb_publishable_`). Si vous ne la trouvez pas, ouvrez l'onglet **Legacy API keys** et
+   copiez la clé **anon public** (un long texte commençant par `eyJ`) : elle fonctionne aussi,
+   à coller dans la même variable Vercel. Autre chemin : le bouton **Connect** en haut de la
+   page du projet affiche l'URL et la clé toutes prêtes.
 
 > Ces deux valeurs peuvent être visibles publiquement, ce n'est pas un problème : la sécurité
 > est assurée par les règles de la base (chacun ne voit que ses propres livres).
