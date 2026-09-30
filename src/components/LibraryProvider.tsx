@@ -26,6 +26,8 @@ type LibraryContextValue = {
   /** Ajoute le livre, ou met à jour sa note et son avis s'il y est déjà */
   save: (book: Book, input: EntryInput) => Promise<void>;
   remove: (bookId: string) => Promise<void>;
+  /** Enregistre « Mon top » : identifiants des livres, du premier au dernier */
+  setTop: (bookIds: string[]) => Promise<void>;
   /** Transforme la session anonyme en vrai compte (la bibliothèque est conservée) */
   signUp: (input: SignUpInput) => Promise<void>;
   /** Se connecte à un compte existant (les livres ajoutés sans compte y sont copiés) */
@@ -168,6 +170,17 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     setEntries((current) => current.filter((e) => e.book_id !== bookId));
   }, []);
 
+  const setTop = useCallback(async (bookIds: string[]) => {
+    const { error } = await requireSupabase().rpc("set_top", { book_ids: bookIds });
+    if (error) throw error;
+    setEntries((current) =>
+      current.map((e) => {
+        const index = bookIds.indexOf(e.book_id);
+        return { ...e, top_position: index === -1 ? null : index + 1 };
+      }),
+    );
+  }, []);
+
   const signUp = useCallback(
     async ({ username, email, password }: SignUpInput) => {
       const supabase = requireSupabase();
@@ -243,10 +256,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(
     () => ({
-      status, errorMessage, account, entries, findEntry, save, remove,
+      status, errorMessage, account, entries, findEntry, save, remove, setTop,
       signUp, signIn, signOut, chooseUsername,
     }),
-    [status, errorMessage, account, entries, findEntry, save, remove, signUp, signIn, signOut, chooseUsername],
+    [status, errorMessage, account, entries, findEntry, save, remove, setTop, signUp, signIn, signOut, chooseUsername],
   );
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;

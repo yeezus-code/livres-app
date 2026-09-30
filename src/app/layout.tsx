@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#0f6b6b",
+  viewportFit: "cover", // la barre du bas respecte la zone du geste « accueil » des iPhone
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

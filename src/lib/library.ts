@@ -11,9 +11,14 @@ export type LibraryEntry = {
   year: number | null;
   rating: number | null;
   review: string | null;
+  /** Place dans « Mon top » (1 = premier), null si le livre n'y est pas */
+  top_position: number | null;
   created_at: string;
   updated_at: string;
 };
+
+/** Nombre maximum de livres dans « Mon top » */
+export const TOP_SIZE = 10;
 
 /** Ce que l'utilisateur saisit dans le formulaire. */
 export type EntryInput = { rating: number | null; review: string };

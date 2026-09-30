@@ -10,6 +10,7 @@ export function Header() {
   const links = [
     { href: "/", label: "Recherche" },
     { href: "/bibliotheque", label: "Bibliothèque" },
+    { href: "/top", label: "Top" },
     { href: "/compte", label: account?.username ? `@${account.username}` : "Compte" },
   ];
   return (

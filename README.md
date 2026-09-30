@@ -11,7 +11,10 @@ Une application web pour noter ses lectures, dans l'esprit de Letterboxd.
 - Comptes (pseudo, e-mail, mot de passe) : on peut commencer sans compte, puis en créer un
   sans perdre ses livres, et retrouver sa bibliothèque sur tous ses appareils.
 
-**À venir** : page « Mon top », profils publics, abonnements.
+- « Mon top » : un classement de 10 livres maximum, dans l'ordre de son choix (on peut
+  partir de ses livres les mieux notés).
+
+**À venir** : profils publics, abonnements.
 
 ---
 
@@ -121,6 +124,14 @@ Test : dans l'application, ouvrez **Compte**, créez un compte. Votre pseudo app
 à droite, vos livres sont toujours là. Sur votre téléphone, **Compte** → **Se connecter** :
 vous retrouvez la même bibliothèque.
 
+### Étape 6 — Activer « Mon top »
+
+Dans Supabase → **SQL Editor** → **New query** : copiez tout le contenu de
+[`supabase/03-top.sql`](supabase/03-top.sql), collez-le, cliquez **Run**.
+
+Test : onglet **Top** → **Partir de mes mieux notés** (ou **Composer mon top**), réordonnez
+avec ↑ ↓, **Enregistrer**, puis rechargez la page : l'ordre est conservé.
+
 > Sans compte, la bibliothèque est liée au navigateur. En se connectant sur un appareil où
 > des livres avaient été ajoutés sans compte, ces livres sont copiés dans le compte.
 
@@ -146,3 +157,5 @@ npm run dev                  # http://localhost:3000
 | `supabase/01-bibliotheque.sql`          | table `library_entries` et règles de sécurité (RLS)         |
 | `supabase/02-comptes.sql`               | table `profiles` (pseudos)                                  |
 | `src/app/compte/page.tsx`               | création de compte, connexion, déconnexion                  |
+| `supabase/03-top.sql`                   | colonne `top_position` et fonction `set_top`                |
+| `src/app/top/page.tsx`                  | page « Mon top » (lecture et modification)                  |
