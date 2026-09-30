@@ -17,6 +17,7 @@ export function Footer() {
           <p className="footer__title">Explorer</p>
           <ul className="footer__links">
             <li><Link href="/recherche">Rechercher un livre</Link></li>
+            <li><Link href="/selections">Nos sélections</Link></li>
             <li><Link href="/lecteurs">Lecteurs</Link></li>
             <li><Link href="/installer">Installer l&apos;appli</Link></li>
             <li><Link href="/mentions-legales">Mentions légales</Link></li>

@@ -224,3 +224,62 @@ export async function searchBooks(title: string, author?: string): Promise<Book[
     gb.status === "fulfilled" ? gb.value : [],
   );
 }
+
+// ---------------------------------------------------------------------------
+// Dernières sorties : romans en français récemment publiés (Google Books)
+// ---------------------------------------------------------------------------
+type GoogleVolumeDetails = GoogleVolume & {
+  volumeInfo: GoogleVolume["volumeInfo"] & { pageCount?: number; language?: string };
+};
+
+/** Les romans en français parus ces derniers mois, avec couverture. */
+export async function latestReleases(max = 18): Promise<Book[]> {
+  const queries = ["subject:fiction", "subject:roman", 'subject:"literary fiction"'];
+  const responses = await Promise.allSettled(
+    queries.map(async (q) => {
+      const url = new URL("https://www.googleapis.com/books/v1/volumes");
+      url.searchParams.set("q", q);
+      url.searchParams.set("orderBy", "newest");
+      url.searchParams.set("langRestrict", "fr");
+      url.searchParams.set("printType", "books");
+      url.searchParams.set("maxResults", "40");
+      const key = process.env.GOOGLE_BOOKS_API_KEY;
+      if (key) url.searchParams.set("key", key);
+      const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+      if (!res.ok) throw new Error(`Google Books a répondu ${res.status}`);
+      const data: { items?: GoogleVolumeDetails[] } = await res.json();
+      return data.items ?? [];
+    }),
+  );
+  const items = responses.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+  if (!items.length && responses.every((r) => r.status === "rejected")) {
+    throw new Error("Google Books n'a pas répondu");
+  }
+
+  // Parus il y a moins de 9 mois (et pas dans le futur : précommandes exclues)
+  const now = new Date();
+  const oldest = new Date(now);
+  oldest.setMonth(oldest.getMonth() - 9);
+
+  const books: Book[] = [];
+  for (const item of items) {
+    const info = item.volumeInfo;
+    const published = new Date(info.publishedDate ?? "");
+    if (!info.title || !info.authors?.length || !info.imageLinks) continue;
+    if (info.language && info.language !== "fr") continue;
+    if (Number.isNaN(published.getTime()) || published < oldest || published > now) continue;
+    if (info.pageCount !== undefined && info.pageCount < 80) continue; // brochures, nouvelles isolées
+    const book: Book = {
+      id: "gb:" + item.id,
+      title: info.title,
+      authors: info.authors.slice(0, 3),
+      coverUrl: googleCover(info.imageLinks),
+      genres: toGenres(info.categories),
+      year: published.getFullYear(),
+    };
+    if (books.some((b) => b.id === book.id || sameBook(b, book))) continue;
+    books.push(book);
+    if (books.length >= max) break;
+  }
+  return books;
+}

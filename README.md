@@ -252,6 +252,23 @@ e-mails. Le plus simple, gratuit : une **redirection** vers votre boîte Gmail a
 
 ---
 
+### Modifier les sélections de saison et les dernières sorties
+
+Tout se trouve dans un seul fichier : `src/lib/collections.ts`. Sur GitHub, ouvrez-le,
+cliquez sur le crayon ✎, modifiez, puis « Commit changes ». Le site se met à jour en 1 à 2 minutes.
+
+- **Ajouter un livre à une sélection** : copiez une ligne `{ title: "…", author: "…" },`
+  dans la bonne sélection et changez le titre et l'auteur. La couverture est trouvée toute seule.
+- **Changer les dates d'une saison** : `season: { from: "12-01", to: "12-31" }` (mois-jour).
+- **Créer une nouvelle sélection** : copiez un bloc entier `{ id: …, … },`, donnez-lui un
+  `id` unique (sans espace ni accent), un titre, des dates et des couleurs.
+- **Dernières sorties** : si la liste `NEW_RELEASES` est vide, Codex va chercher tout seul les
+  romans en français parus récemment. Pour choisir vous-même, écrivez-y les livres voulus.
+
+Les couvertures d'une sélection sont gardées une semaine en mémoire, les nouveautés une journée :
+une modification peut donc mettre jusqu'à ce délai pour apparaître (ou tout de suite après un
+nouveau déploiement).
+
 ## Pour les développeurs
 
 ```bash

@@ -1619,3 +1619,87 @@ p.with-avatar { display: flex; }
 
 .logo-mark { flex-shrink: 0; transition: transform 0.2s ease; }
 .logo:hover .logo-mark { transform: rotate(-4deg); }
+
+/* ==========================================================================
+   Sélections de saison : bandeau sombre aux couleurs de la saison
+   (couleurs réglées dans src/lib/collections.ts)
+   ========================================================================== */
+.season {
+  position: relative;
+  isolation: isolate;
+  padding-block: 1.75rem 1.1rem;
+  color: #f7f3ea;
+}
+
+.season::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 55% 80% at 85% 0%, color-mix(in srgb, var(--season-accent) 22%, transparent), transparent 70%),
+    linear-gradient(160deg, var(--season-from), var(--season-to) 75%);
+  border-block: 2px solid var(--season-accent);
+}
+
+.season__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.season__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--season-accent);
+}
+
+.season__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 500;
+  color: #fffaf0;
+}
+
+.season__subtitle { margin: 0.3rem 0 0; color: rgb(247 243 234 / 0.75); }
+
+.season__link {
+  color: var(--season-accent);
+  font-weight: 600;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.season__link:hover { color: #fffaf0; }
+
+.season .rail__title { color: #fffaf0; }
+.season .rail__author { color: rgb(247 243 234 / 0.7); }
+.season .rail__placeholder { background: rgb(255 255 255 / 0.12); }
+.season .rail__check { box-shadow: 0 0 0 2px var(--season-to); }
+.season .rail { scrollbar-color: rgb(255 255 255 / 0.3) transparent; }
+
+/* Plusieurs bandeaux de saison qui se suivent (page des sélections) */
+.season + .season { margin-top: -1.75rem; }
+.season + .season::before { border-top: 0; }
+
+.selections-intro { max-width: 40rem; margin-bottom: 1.5rem; }
+
+/* À découvrir : plusieurs petites rangées sous un même titre */
+.discover + .discover { margin-top: 0.75rem; }
+.discover__title {
+  margin: 0 0 0.6rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Sélection du moment collée au grand bandeau d'accueil */
+.hero + .season { margin-top: 0; }
+.hero + .season::before { border-top: 0; }

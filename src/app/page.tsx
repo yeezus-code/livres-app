@@ -15,12 +15,15 @@ import {
 import { timeAgo } from "@/lib/social";
 import { isRead } from "@/lib/library";
 import { fetchLikeCounts } from "@/lib/likes";
+import { currentCollections, getCollection } from "@/lib/collections";
+import { fetchSuggestions, type SuggestionShelf } from "@/lib/discover";
 import { SITE } from "@/lib/site";
 import { getSupabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
 import { BookCover } from "@/components/BookCover";
 import { BookDialog } from "@/components/BookDialog";
 import { BookShelf } from "@/components/BookShelf";
+import { CollectionBand, useCollectionBooks, useToday } from "@/components/CollectionBand";
 import { EntryDialog } from "@/components/EntryDialog";
 import { useLibrary } from "@/components/LibraryProvider";
 import { Stars } from "@/components/StarRating";
@@ -31,19 +34,32 @@ export default function HomePage() {
   const router = useRouter();
   const { status, account, entries } = useLibrary();
   const [query, setQuery] = useState("");
-  const [classics, setClassics] = useState<Book[] | null>(null);
+  const today = useToday();
+  const classics = useCollectionBooks("classiques");
+  const [releases, setReleases] = useState<Book[] | null>(null);
+  const [suggestions, setSuggestions] = useState<SuggestionShelf[]>([]);
   const [community, setCommunity] = useState<Community | null>(null);
   const [toAdd, setToAdd] = useState<Book | null>(null);
   const [review, setReview] = useState<Review | null>(null);
   const [likes, setLikes] = useState<Map<string, number>>(new Map());
 
-  // Les grands classiques (ne dépendent pas de Supabase)
+  // Les dernières sorties (ne dépendent pas de Supabase)
   useEffect(() => {
-    fetch("/api/classiques")
+    fetch("/api/nouveautes")
       .then((res) => res.json())
-      .then((data) => setClassics(data.books ?? []))
-      .catch(() => setClassics([]));
+      .then((data) => setReleases(data.books ?? []))
+      .catch(() => setReleases([]));
   }, []);
+
+  // « À découvrir » : suggestions calculées d'après la bibliothèque et les abonnements
+  const userId = account?.username ? account.id : null;
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase || !userId) return;
+    fetchSuggestions(supabase, userId, entries)
+      .then(setSuggestions)
+      .catch((e) => console.error("Suggestions :", e));
+  }, [userId, entries]);
 
   // Ce qui vient des lecteurs de l'application
   useEffect(() => {
@@ -154,8 +170,44 @@ export default function HomePage() {
         </section>
       )}
 
+      {today &&
+        currentCollections(today).map((collection) => (
+          <CollectionBand
+            key={collection.id}
+            collection={collection}
+            onSelect={setToAdd}
+            eyebrow="Sélection du moment"
+            showAllLink
+          />
+        ))}
+
+      {suggestions.length > 0 && (
+        <section className="home-section">
+          <h2 className="section-title">À découvrir pour vous</h2>
+          {suggestions.map((shelf) => (
+            <div key={shelf.id} className="discover">
+              <h3 className="discover__title">{shelf.title}</h3>
+              <BookShelf
+                items={shelf.items.map(({ book, note }) => ({
+                  book,
+                  caption: <span className="muted">{note}</span>,
+                }))}
+                onSelect={setToAdd}
+              />
+            </div>
+          ))}
+        </section>
+      )}
+
+      {releases !== null && releases.length > 0 && (
+        <section className="home-section band">
+          <h2 className="section-title">Dernières sorties</h2>
+          <BookShelf items={releases.map((book) => ({ book }))} onSelect={setToAdd} />
+        </section>
+      )}
+
       <section className="home-section">
-        <h2 className="section-title">Les grands classiques</h2>
+        <h2 className="section-title">{getCollection("classiques")!.title}</h2>
         <BookShelf
           loading={classics === null}
           items={(classics ?? []).map((book) => ({ book }))}
