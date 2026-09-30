@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Book } from "@/lib/books";
-import { toFrenchMessage } from "@/lib/account";
+import { toMessage } from "@/lib/account";
+import { useI18n } from "@/i18n/I18nProvider";
 import { isRead, today, type EntryStatus } from "@/lib/library";
 import { BookHeader } from "./BookHeader";
 import { useLibrary } from "./LibraryProvider";
@@ -38,6 +39,7 @@ export function BookDialog({ book, onClose }: { book: Book | null; onClose: () =
 
 function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
   const { findEntry, save, remove } = useLibrary();
+  const { t, f, locale } = useI18n();
   const existing = findEntry(book.id);
 
   const [status, setStatus] = useState<EntryStatus>(existing?.status ?? "lu");
@@ -57,23 +59,23 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
       await action();
       onDone();
     } catch (e) {
-      setError(toFrenchMessage(e));
+      setError(toMessage(e, locale, t.errors));
     } finally {
       setBusy(false);
     }
   }
 
-  const listName = existing && !isRead(existing) ? "votre liste « À lire »" : "votre bibliothèque";
-
   function handleDelete() {
-    if (confirm(`Retirer « ${book.title} » de ${listName} ?`)) {
+    const question =
+      existing && !isRead(existing) ? t.book.confirmRemoveToRead : t.book.confirmRemoveLibrary;
+    if (confirm(f(question, { title: book.title }))) {
       run(() => remove(book.id));
     }
   }
 
-  let submitLabel = "Enregistrer";
-  if (!existing) submitLabel = status === "lu" ? "Ajouter" : "Ajouter à ma liste";
-  else if (existing && !isRead(existing) && status === "lu") submitLabel = "C'est lu !";
+  let submitLabel = t.common.save;
+  if (!existing) submitLabel = status === "lu" ? t.common.add : t.book.addToList;
+  else if (existing && !isRead(existing) && status === "lu") submitLabel = t.book.doneReading;
 
   return (
     <form
@@ -85,7 +87,7 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
     >
       <BookHeader book={book} />
 
-      <div className="tabs tabs--choice" role="radiogroup" aria-label="Où ranger ce livre">
+      <div className="tabs tabs--choice" role="radiogroup" aria-label={t.book.where}>
         <button
           type="button"
           role="radio"
@@ -93,7 +95,7 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
           className="tab"
           onClick={() => setStatus("lu")}
         >
-          ✓ Je l&apos;ai lu
+          {t.book.read}
         </button>
         <button
           type="button"
@@ -102,19 +104,19 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
           className="tab"
           onClick={() => setStatus("a_lire")}
         >
-          ☆ Je veux le lire
+          {t.book.wantToRead}
         </button>
       </div>
 
       {status === "lu" ? (
         <>
           <fieldset className="field">
-            <legend>Votre note</legend>
+            <legend>{t.book.yourRating}</legend>
             <StarInput value={rating} onChange={setRating} />
           </fieldset>
 
           <label className="field">
-            <span>Lu le</span>
+            <span>{t.book.readOnLabel}</span>
             <input
               type="date"
               value={readOn}
@@ -122,25 +124,22 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
               onChange={(e) => setReadOn(e.target.value)}
               className="input-date"
             />
-            <small className="muted">Facultatif : laissez vide si vous ne savez plus.</small>
+            <small className="muted">{t.book.readOnHint}</small>
           </label>
 
           <label className="field">
-            <span>Votre avis</span>
+            <span>{t.book.yourReview}</span>
             <textarea
               value={review}
               onChange={(e) => setReview(e.target.value)}
               rows={5}
               maxLength={5000}
-              placeholder="Ce que vous en avez pensé… (facultatif)"
+              placeholder={t.book.reviewPlaceholder}
             />
           </label>
         </>
       ) : (
-        <p className="muted small">
-          Le livre rejoint votre liste « À lire ». Quand vous l&apos;aurez lu, rouvrez-le pour le
-          noter.
-        </p>
+        <p className="muted small">{t.book.toReadInfo}</p>
       )}
 
       {error && <p className="error">{error}</p>}
@@ -148,12 +147,12 @@ function BookForm({ book, onDone }: { book: Book; onDone: () => void }) {
       <div className="dialog__actions">
         {existing && (
           <button type="button" className="btn btn--danger" onClick={handleDelete} disabled={busy}>
-            Retirer
+            {t.book.remove}
           </button>
         )}
         <span className="spacer" />
         <button type="button" className="btn btn--ghost" onClick={onDone} disabled={busy}>
-          Annuler
+          {t.common.cancel}
         </button>
         <button type="submit" className="btn btn--primary" disabled={busy}>
           {busy ? "…" : submitLabel}

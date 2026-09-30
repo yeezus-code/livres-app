@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { splitLocale } from "@/i18n/config";
+import { useI18n } from "@/i18n/I18nProvider";
 import { SITE } from "@/lib/site";
 import { Avatar } from "./Avatar";
 import { LogoMark } from "./LogoMark";
@@ -24,24 +26,25 @@ function isCurrent(pathname: string, href: string) {
 }
 
 export function Header() {
-  const pathname = usePathname();
+  const pathname = splitLocale(usePathname()).path;
   const { account } = useLibrary();
+  const { t, f, href } = useI18n();
   const links = [
-    { href: "/", label: "Accueil", short: "Accueil", icon: "home" },
-    { href: "/recherche", label: "Recherche", short: "Chercher", icon: "search" },
-    { href: "/bibliotheque", label: "Bibliothèque", short: "Biblio", icon: "books" },
-    { href: "/lecteurs", label: "Lecteurs", short: "Lecteurs", icon: "people" },
+    { href: "/", label: t.nav.home, short: t.nav.homeShort, icon: "home" },
+    { href: "/recherche", label: t.nav.search, short: t.nav.searchShort, icon: "search" },
+    { href: "/bibliotheque", label: t.nav.library, short: t.nav.libraryShort, icon: "books" },
+    { href: "/lecteurs", label: t.nav.readers, short: t.nav.readersShort, icon: "people" },
     {
       href: "/compte",
-      label: account?.username ? `@${account.username}` : "Compte",
-      short: account?.username ? "Moi" : "Compte",
+      label: account?.username ? `@${account.username}` : t.nav.account,
+      short: account?.username ? t.nav.me : t.nav.accountShort,
       icon: "user",
     },
   ];
   return (
     <header className="header">
       <div className="header__inner">
-        <Link href="/" className="logo" aria-label={`${SITE.name}, accueil`}>
+        <Link href={href("/")} className="logo" aria-label={f(t.nav.homeLabel, { name: SITE.name })}>
           <LogoMark />
           <span className="logo__text">{SITE.name}</span>
         </Link>
@@ -49,7 +52,7 @@ export function Header() {
           {links.map((link) => (
             <Link
               key={link.href}
-              href={link.href}
+              href={href(link.href)}
               className="nav__link"
               aria-current={isCurrent(pathname, link.href) ? "page" : undefined}
             >
@@ -77,25 +80,18 @@ export function Header() {
 /** Bandeau affiché tant que la bibliothèque n'est pas utilisable. */
 export function StatusBanner() {
   const { status, errorMessage } = useLibrary();
-  const pathname = usePathname();
+  const { t, f } = useI18n();
+  const pathname = splitLocale(usePathname()).path;
 
   if (status === "ready") return null;
   if (status === "loading") {
-    return pathname === "/bibliotheque" ? <p className="muted center">Chargement…</p> : null;
+    return pathname === "/bibliotheque" ? <p className="muted center">{t.common.loading}</p> : null;
   }
-  if (status === "unconfigured") {
-    return (
-      <p className="banner">
-        La recherche fonctionne, mais la bibliothèque n&apos;est pas encore branchée : il manque
-        les réglages Supabase (voir le README, étape 2).
-      </p>
-    );
-  }
+  if (status === "unconfigured") return <p className="banner">{t.status.unconfigured}</p>;
   return (
     <p className="banner banner--error">
-      Impossible d&apos;ouvrir votre bibliothèque. Vérifiez les réglages Supabase : connexions
-      anonymes activées (README, étape 2) et fichier 02-comptes.sql lancé (étape 5).
-      {errorMessage && <span className="small"> Détail : {errorMessage}</span>}
+      {t.status.error}
+      {errorMessage && <span className="small"> {f(t.status.detail, { message: errorMessage })}</span>}
     </p>
   );
 }

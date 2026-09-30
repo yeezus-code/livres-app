@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 
 // Événement propre à Chrome / Edge / Android : permet d'afficher la fenêtre d'installation
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<unknown> };
@@ -39,6 +40,7 @@ function recentlyDismissed() {
 export function InstallPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallEvent | null>(null);
   const [mode, setMode] = useState<"hidden" | "android" | "ios">("hidden");
+  const { t, r, href } = useI18n();
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -85,28 +87,28 @@ export function InstallPrompt() {
   if (mode === "hidden") return null;
 
   return (
-    <div className="install" role="dialog" aria-label="Installer l'application Codex">
+    <div className="install" role="dialog" aria-label={t.install.bannerLabel}>
       {/* eslint-disable-next-line @next/next/no-img-element -- petite icône locale */}
       <img src="/icon-192.png" alt="" className="install__icon" />
       <div className="install__text">
-        <strong>Codex sur votre écran d&apos;accueil</strong>
+        <strong>{t.install.bannerTitle}</strong>
         {mode === "android" ? (
-          <span>Installez l&apos;appli : plein écran, en un geste.</span>
+          <span>{t.install.bannerAndroid}</span>
         ) : (
           <span>
-            Touchez <ShareIcon /> puis <b>« Sur l&apos;écran d&apos;accueil »</b>.{" "}
-            <Link href="/installer" onClick={dismiss}>
-              Aide
+            {r(t.install.bannerIos, { icon: <ShareIcon />, action: <b>{t.install.ios3Action}</b> })}{" "}
+            <Link href={href("/installer")} onClick={dismiss}>
+              {t.install.help}
             </Link>
           </span>
         )}
       </div>
       {mode === "android" && (
         <button className="btn btn--primary install__btn" onClick={install}>
-          Installer
+          {t.install.installButton}
         </button>
       )}
-      <button className="install__close" onClick={dismiss} aria-label="Fermer">
+      <button className="install__close" onClick={dismiss} aria-label={t.common.close}>
         ✕
       </button>
     </div>
@@ -115,8 +117,9 @@ export function InstallPrompt() {
 
 /** Pictogramme « Partager » d'iPhone (carré et flèche vers le haut) */
 export function ShareIcon() {
+  const { t } = useI18n();
   return (
-    <svg className="share-icon" viewBox="0 0 24 24" aria-label="Partager" role="img">
+    <svg className="share-icon" viewBox="0 0 24 24" aria-label={t.install.share} role="img">
       <path
         d="M12 3v12M7.5 7.5 12 3l4.5 4.5M8 11H6.5A1.5 1.5 0 0 0 5 12.5v7A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5H16"
         fill="none"

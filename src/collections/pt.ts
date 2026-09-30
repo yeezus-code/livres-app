@@ -1,0 +1,138 @@
+// Sélections affichées en portugais du Brésil. Voir le mode d'emploi dans src/lib/collections.ts.
+// Au Brésil (hémisphère sud), les saisons sont inversées : l'hiver est en juin-août,
+// l'été et les vacances en décembre-février, la rentrée des classes en février.
+import { THEMES, type BookRef, type Collection } from "./themes";
+
+export const collections: Collection[] = [
+  {
+    id: "classiques",
+    title: "Os grandes clássicos",
+    subtitle: "Os essenciais, para ler pelo menos uma vez.",
+    theme: THEMES.classiques,
+    books: [
+      { title: "Dom Casmurro", author: "Machado de Assis" },
+      { title: "Memórias Póstumas de Brás Cubas", author: "Machado de Assis" },
+      { title: "Grande Sertão: Veredas", author: "João Guimarães Rosa" },
+      { title: "Vidas Secas", author: "Graciliano Ramos" },
+      { title: "A Hora da Estrela", author: "Clarice Lispector" },
+      { title: "Capitães da Areia", author: "Jorge Amado" },
+      { title: "O Cortiço", author: "Aluísio Azevedo" },
+      { title: "Cem Anos de Solidão", author: "Gabriel García Márquez" },
+      { title: "Orgulho e Preconceito", author: "Jane Austen" },
+      { title: "1984", author: "George Orwell" },
+      { title: "Crime e Castigo", author: "Fiódor Dostoiévski" },
+      { title: "O Pequeno Príncipe", author: "Antoine de Saint-Exupéry" },
+    ],
+  },
+  {
+    id: "rentree",
+    title: "Volta às aulas",
+    subtitle: "Mochilas, lembranças da escola e primeiras vezes.",
+    season: { from: "02-01", to: "03-15" },
+    theme: THEMES.rentree,
+    books: [
+      { title: "O Ateneu", author: "Raul Pompeia" },
+      { title: "Meu Pé de Laranja Lima", author: "José Mauro de Vasconcelos" },
+      { title: "Sociedade dos Poetas Mortos", author: "N. H. Kleinbaum" },
+      { title: "Harry Potter e a Pedra Filosofal", author: "J. K. Rowling" },
+      { title: "O Apanhador no Campo de Centeio", author: "J. D. Salinger" },
+      { title: "Matilda", author: "Roald Dahl" },
+    ],
+  },
+  {
+    id: "halloween",
+    title: "Histórias de arrepiar",
+    subtitle: "Para o Dia das Bruxas: leia com a luz acesa.",
+    season: { from: "10-16", to: "11-02" },
+    theme: THEMES.halloween,
+    books: [
+      { title: "Frankenstein", author: "Mary Shelley" },
+      { title: "Drácula", author: "Bram Stoker" },
+      { title: "O Iluminado", author: "Stephen King" },
+      { title: "O Médico e o Monstro", author: "Robert Louis Stevenson" },
+      { title: "Rebecca", author: "Daphne du Maurier" },
+      { title: "A Volta do Parafuso", author: "Henry James" },
+    ],
+  },
+  {
+    id: "couette",
+    title: "Debaixo das cobertas",
+    subtitle: "Livros aconchegantes para as noites frias de inverno.",
+    season: { from: "06-01", to: "08-31" },
+    theme: THEMES.couette,
+    books: [
+      { title: "A Menina que Roubava Livros", author: "Markus Zusak" },
+      {
+        title: "A Sociedade Literária e a Torta de Casca de Batata",
+        author: "Mary Ann Shaffer",
+      },
+      { title: "Um Homem Chamado Ove", author: "Fredrik Backman" },
+      { title: "Como Água para Chocolate", author: "Laura Esquivel" },
+      { title: "Jane Eyre", author: "Charlotte Brontë" },
+      { title: "O Hobbit", author: "J. R. R. Tolkien" },
+    ],
+  },
+  {
+    id: "saint-valentin",
+    title: "Dia dos Namorados",
+    subtitle: "Histórias de amor para o 12 de junho, ou para o ano todo.",
+    season: { from: "05-25", to: "06-12" },
+    theme: THEMES.amour,
+    books: [
+      { title: "Senhora", author: "José de Alencar" },
+      { title: "O Amor nos Tempos do Cólera", author: "Gabriel García Márquez" },
+      { title: "Romeu e Julieta", author: "William Shakespeare" },
+      { title: "O Morro dos Ventos Uivantes", author: "Emily Brontë" },
+      { title: "Orgulho e Preconceito", author: "Jane Austen" },
+      { title: "Como Eu Era Antes de Você", author: "Jojo Moyes" },
+    ],
+  },
+  {
+    id: "printemps",
+    title: "Leituras de primavera",
+    subtitle: "Livros luminosos para a volta dos dias de sol.",
+    season: { from: "09-01", to: "11-30" },
+    theme: THEMES.printemps,
+    books: [
+      { title: "O Alquimista", author: "Paulo Coelho" },
+      { title: "O Jardim Secreto", author: "Frances Hodgson Burnett" },
+      { title: "A Elegância do Ouriço", author: "Muriel Barbery" },
+      { title: "Comer, Rezar, Amar", author: "Elizabeth Gilbert" },
+      { title: "A Moreninha", author: "Joaquim Manuel de Macedo" },
+      { title: "Chocolate", author: "Joanne Harris" },
+    ],
+  },
+  {
+    id: "noel",
+    title: "Leituras de Natal",
+    subtitle: "Histórias com cheiro de rabanada e panetone.",
+    season: { from: "12-01", to: "12-31" },
+    theme: THEMES.noel,
+    books: [
+      { title: "Um Conto de Natal", author: "Charles Dickens" },
+      { title: "O Natal de Poirot", author: "Agatha Christie" },
+      { title: "Mulherzinhas", author: "Louisa May Alcott" },
+      { title: "O Leão, a Feiticeira e o Guarda-Roupa", author: "C. S. Lewis" },
+      { title: "O Expresso Polar", author: "Chris Van Allsburg" },
+      { title: "O Quebra-Nozes e o Rei dos Camundongos", author: "E. T. A. Hoffmann" },
+    ],
+  },
+  {
+    id: "plage",
+    title: "Leituras de praia",
+    subtitle: "Páginas que se viram sozinhas, com o pé na areia.",
+    season: { from: "12-20", to: "03-10" },
+    theme: THEMES.plage,
+    books: [
+      { title: "Gabriela, Cravo e Canela", author: "Jorge Amado" },
+      { title: "A Amiga Genial", author: "Elena Ferrante" },
+      { title: "A Verdade sobre o Caso Harry Quebert", author: "Joël Dicker" },
+      { title: "E Não Sobrou Nenhum", author: "Agatha Christie" },
+      { title: "Bom Dia, Tristeza", author: "Françoise Sagan" },
+      { title: "O Velho e o Mar", author: "Ernest Hemingway" },
+    ],
+  },
+];
+
+// Lançamentos : liste vide = recherche automatique des romans en portugais récents.
+export const newReleases: BookRef[] = [];

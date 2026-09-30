@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { entryToBook, formatDate, isRead, type LibraryEntry } from "@/lib/library";
+import { entryToBook, isRead, type LibraryEntry } from "@/lib/library";
+import { useI18n } from "@/i18n/I18nProvider";
 import type { Book } from "@/lib/books";
 import { profileHref, type Profile } from "@/lib/social";
 import { Avatar } from "./Avatar";
@@ -29,6 +30,7 @@ export function EntryDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const { status, findEntry } = useLibrary();
+  const { t, f, href, date } = useI18n();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -53,16 +55,16 @@ export function EntryDialog({
           {author && (
             <p className="small muted with-avatar">
               <Avatar url={author.avatar_url} username={author.username} size={24} />
-              {isRead(entry) ? "Avis de" : "Dans la liste « À lire » de"}{" "}
-              <Link href={profileHref(author.username)}>@{author.username}</Link>
+              {isRead(entry) ? t.book.reviewBy : t.book.inToReadOf}{" "}
+              <Link href={href(profileHref(author.username))}>@{author.username}</Link>
             </p>
           )}
           {isRead(entry) && (
             <>
               <div className="entry-meta">
-                {entry.rating ? <Stars value={entry.rating} /> : <span className="muted">Pas de note</span>}
+                {entry.rating ? <Stars value={entry.rating} /> : <span className="muted">{t.common.noRating}</span>}
                 {entry.read_on && (
-                  <span className="small muted">Lu le {formatDate(entry.read_on)}</span>
+                  <span className="small muted">{f(t.common.readOn, { date: date(entry.read_on) })}</span>
                 )}
               </div>
               {entry.review ? (
@@ -73,7 +75,7 @@ export function EntryDialog({
                   </p>
                 </>
               ) : (
-                <p className="muted small">Pas d&apos;avis écrit.</p>
+                <p className="muted small">{t.book.noReview}</p>
               )}
             </>
           )}
@@ -81,7 +83,7 @@ export function EntryDialog({
           <div className="dialog__actions">
             <span className="spacer" />
             <button type="button" className="btn btn--ghost" onClick={onClose}>
-              Fermer
+              {t.common.close}
             </button>
             {status === "ready" && (
               <button
@@ -89,7 +91,7 @@ export function EntryDialog({
                 className={mine ? "btn btn--ghost" : "btn btn--primary"}
                 onClick={() => onAdd(entryToBook(entry))}
               >
-                {mine ? "Ma note" : "Ajouter à ma bibliothèque"}
+                {mine ? t.book.myRating : t.book.addToLibrary}
               </button>
             )}
           </div>

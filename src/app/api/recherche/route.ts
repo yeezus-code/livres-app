@@ -1,15 +1,19 @@
+import { isLocale } from "@/i18n/config";
 import { searchBooks } from "@/lib/books";
 
-// GET /api/recherche?titre=dune  →  liste de livres au format JSON
+// GET /api/recherche?titre=dune&lang=en  →  liste de livres au format JSON
+// (« lang » : langue des titres et des couvertures, français par défaut)
 export async function GET(request: Request) {
-  const title = new URL(request.url).searchParams.get("titre")?.trim() ?? "";
+  const params = new URL(request.url).searchParams;
+  const title = params.get("titre")?.trim() ?? "";
+  const lang = params.get("lang");
 
   if (title.length < 2) {
     return Response.json({ books: [] });
   }
 
   try {
-    const books = await searchBooks(title.slice(0, 200));
+    const books = await searchBooks(title.slice(0, 200), undefined, isLocale(lang) ? lang : "fr");
     return Response.json(
       { books },
       // Une même recherche peut être resservie depuis le cache de Vercel pendant 1 h
@@ -17,9 +21,6 @@ export async function GET(request: Request) {
     );
   } catch (error) {
     console.error(error);
-    return Response.json(
-      { error: "La recherche est momentanément indisponible. Réessayez dans un instant." },
-      { status: 502 },
-    );
+    return Response.json({ error: "unavailable" }, { status: 502 });
   }
 }

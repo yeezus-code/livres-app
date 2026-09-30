@@ -3,7 +3,7 @@
 // en mémoire les fichiers du site qui ne changent jamais (pour aller plus vite).
 // Il ne met JAMAIS en cache les pages ni les données : on voit toujours la dernière version.
 
-const CACHE = "codex-v3";
+const CACHE = "codex-v4";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {

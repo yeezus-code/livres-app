@@ -2,6 +2,7 @@
 
 import type { Book } from "@/lib/books";
 import { BookCover } from "./BookCover";
+import { useI18n } from "@/i18n/I18nProvider";
 import { useLibrary } from "./LibraryProvider";
 
 export type ShelfItem = { book: Book; caption?: React.ReactNode };
@@ -17,6 +18,7 @@ export function BookShelf({
   loading?: boolean;
 }) {
   const { findEntry } = useLibrary();
+  const { t } = useI18n();
 
   if (loading) {
     return (
@@ -38,7 +40,7 @@ export function BookShelf({
             <span className="rail__cover">
               <BookCover src={book.coverUrl} title={book.title} />
               {findEntry(book.id) && (
-                <span className="rail__check" title="Dans ma bibliothèque">
+                <span className="rail__check" title={t.search.inLibrary.trim()}>
                   ✓
                 </span>
               )}

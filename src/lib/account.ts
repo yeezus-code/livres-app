@@ -1,3 +1,7 @@
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries/fr";
+import { fmt } from "@/i18n/format";
+
 /** Qui utilise l'application en ce moment. */
 export type Account = {
   id: string;
@@ -31,58 +35,55 @@ export function normalizeUsername(raw: string): string {
     .replace(/[\s-]+/g, "_");
 }
 
-/** Erreur à afficher telle quelle à l'utilisateur. */
-export class AccountError extends Error {}
+/** Erreur à afficher à l'utilisateur ; « key » désigne le texte dans le dictionnaire (errors). */
+export class AccountError extends Error {
+  constructor(public key: keyof Dictionary["errors"]) {
+    super(key);
+  }
+}
 
-/** Traduit les erreurs de Supabase en messages compréhensibles. */
-export function toFrenchMessage(error: unknown): string {
-  if (error instanceof AccountError) return error.message;
-  if ((error as Error)?.message?.includes("Bucket not found")) {
-    return "Le stockage des photos n'existe pas encore : lancez 05-photos-et-accueil.sql (README).";
-  }
+/** Traduit les erreurs de Supabase en messages compréhensibles, dans la langue du site. */
+export function toMessage(error: unknown, locale: Locale, t: Dictionary["errors"]): string {
+  if (error instanceof AccountError) return t[error.key];
   const message = (error as Error)?.message ?? String(error);
-  if (/error sending/i.test(message)) {
-    // Supabase n'a pas réussi à passer l'e-mail au service d'envoi (Brevo)
-    return (
-      "L'e-mail n'a pas pu partir : Supabase n'arrive pas à se connecter au service d'envoi. " +
-      "Vérifiez les réglages SMTP (README, étape 9). Détail technique : " + message
-    );
-  }
+  if (message.includes("Bucket not found")) return t.bucketMissing;
+  // Supabase n'a pas réussi à passer l'e-mail au service d'envoi
+  if (/error sending/i.test(message)) return fmt(locale, t.emailSending, { message });
   const code = (error as { code?: string })?.code;
   switch (code) {
     case "email_exists":
     case "user_already_exists":
-      return "Un compte existe déjà avec cet e-mail. Utilisez « Se connecter ».";
+      return t.emailExists;
     case "invalid_credentials":
-      return "E-mail ou mot de passe incorrect.";
+      return t.invalidCredentials;
     case "weak_password":
-      return `Mot de passe trop faible : au moins ${PASSWORD_MIN_LENGTH} caractères.`;
+      return fmt(locale, t.weakPassword, { n: PASSWORD_MIN_LENGTH });
     case "email_address_invalid":
     case "validation_failed":
-      return "Cette adresse e-mail n'est pas valide.";
+      return t.invalidEmail;
     case "email_not_confirmed":
-      return "Adresse pas encore confirmée : cliquez sur le lien reçu par e-mail.";
+      return t.emailNotConfirmed;
     case "same_password":
-      return "Le nouveau mot de passe doit être différent de l'ancien.";
+      return t.samePassword;
     case "reauthentication_needed":
-      return "Par sécurité, reconnectez-vous avant de changer de mot de passe.";
+      return t.reauthenticate;
     case "otp_expired":
-      return "Ce lien a expiré ou a déjà été utilisé. Demandez-en un nouveau.";
+      return t.linkExpired;
     case "over_request_rate_limit":
     case "over_email_send_rate_limit":
-      return "Trop de tentatives. Patientez quelques minutes puis réessayez.";
+      return t.rateLimit;
     case "PGRST204": // colonne absente
-      return "La base n'est pas à jour : lancez le dernier fichier SQL du README dans Supabase.";
+      return t.dbOutdated;
     case "42P01": // table absente
     case "PGRST205":
-      return "La table des comptes n'existe pas encore : lancez 02-comptes.sql (README, étape 5).";
+      return t.tableMissing;
     case "email_provider_disabled":
-      return "Les comptes par e-mail sont désactivés dans Supabase (README, étape 5).";
+      return t.emailDisabled;
     case "23505": // doublon dans la base
-      return "Ce pseudo est déjà pris.";
+      return t.usernameTaken;
     default:
       console.error(error);
       // Le détail technique aide à trouver la cause si le problème persiste
-      return `Une erreur est survenue. Réessayez dans un instant. (Détail technique : ${message})`;
+      return fmt(locale, t.generic, { message });
   }
 }

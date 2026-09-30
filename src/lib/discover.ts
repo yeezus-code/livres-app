@@ -6,8 +6,15 @@ import { statsToBook, type BookStats } from "./home";
 import { entryToBook, isRead, type LibraryEntry } from "./library";
 import { fetchFollowing, type Profile } from "./social";
 
-export type Suggestion = { book: Book; note: string };
-export type SuggestionShelf = { id: string; title: string; items: Suggestion[] };
+/** Un livre suggéré : note et pseudo (abonnements), ou moyenne et lecteurs (genres). */
+export type Suggestion =
+  | { book: Book; kind: "friend"; rating: number; username: string }
+  | { book: Book; kind: "community"; average: number | null; readers: number };
+
+/** Une rangée : « friends » (coups de cœur des abonnements) ou « genre » (genre préféré). */
+export type SuggestionShelf =
+  | { id: string; kind: "friends"; items: Suggestion[] }
+  | { id: string; kind: "genre"; genre: string; items: Suggestion[] };
 
 const SHELF_SIZE = 12;
 
@@ -53,7 +60,9 @@ async function fromFollowing(
     seen.add(entry.book_id);
     items.push({
       book: entryToBook(entry),
-      note: `${"★".repeat(entry.rating ?? 0)} par @${byId.get(entry.user_id)?.username ?? "?"}`,
+      kind: "friend",
+      rating: entry.rating ?? 0,
+      username: byId.get(entry.user_id)?.username ?? "?",
     });
     if (items.length >= SHELF_SIZE) break;
   }
@@ -79,10 +88,9 @@ async function fromGenre(
     .slice(0, SHELF_SIZE)
     .map((s) => ({
       book: statsToBook(s),
-      note:
-        s.average !== null
-          ? `★ ${Number(s.average).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}`
-          : `${s.readers} lecteur${s.readers > 1 ? "s" : ""}`,
+      kind: "community" as const,
+      average: s.average === null ? null : Number(s.average),
+      readers: s.readers,
     }));
 }
 
@@ -102,14 +110,14 @@ export async function fetchSuggestions(
 
   const shelves: SuggestionShelf[] = [];
   if (friends.length) {
-    shelves.push({ id: "abonnements", title: "Les coups de cœur de vos abonnements", items: friends });
+    shelves.push({ id: "abonnements", kind: "friends", items: friends });
   }
   const shown = new Set(friends.map((s) => s.book.id));
   genres.forEach((genre, i) => {
     const items = byGenre[i].filter((s) => !shown.has(s.book.id));
     items.forEach((s) => shown.add(s.book.id));
     if (items.length >= 2) {
-      shelves.push({ id: `genre-${genre}`, title: `Parce que vous aimez : ${genre.toLowerCase()}`, items });
+      shelves.push({ id: `genre-${genre}`, kind: "genre", genre, items });
     }
   });
   return shelves;

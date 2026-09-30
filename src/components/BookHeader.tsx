@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Book } from "@/lib/books";
 import { fetchBookStats, type BookStats } from "@/lib/home";
 import { getSupabase } from "@/lib/supabase";
+import { useI18n } from "@/i18n/I18nProvider";
 import { BookCover } from "./BookCover";
 
 /**
@@ -12,6 +13,7 @@ import { BookCover } from "./BookCover";
  */
 export function BookHeader({ book }: { book: Book }) {
   const [stats, setStats] = useState<BookStats | null>(null);
+  const { t, f, number, genre } = useI18n();
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -33,7 +35,7 @@ export function BookHeader({ book }: { book: Book }) {
           {book.year && <span>{book.year}</span>}
           {book.genres.map((g) => (
             <span key={g} className="chip-genre">
-              {g}
+              {genre(g)}
             </span>
           ))}
         </p>
@@ -42,12 +44,12 @@ export function BookHeader({ book }: { book: Book }) {
             {stats.average !== null && (
               <>
                 <span className="star star--on">★</span>{" "}
-                <strong>{Number(stats.average).toLocaleString("fr-FR")}</strong>
+                <strong>{number(Number(stats.average), 2)}</strong>
                 <span className="muted"> /5 · </span>
               </>
             )}
             <span className="muted">
-              {stats.readers} lecteur{stats.readers > 1 ? "s" : ""} sur Codex
+              {f(t.book.communityReaders, { n: stats.readers })}
             </span>
           </p>
         )}

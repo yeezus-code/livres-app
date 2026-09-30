@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchLikeState, setLiked } from "@/lib/likes";
 import { getSupabase } from "@/lib/supabase";
+import { useI18n } from "@/i18n/I18nProvider";
 import { useLibrary } from "./LibraryProvider";
 
 /** Bouton « ♥ J'aime » d'un avis, avec le nombre de « j'aime ». */
 export function LikeButton({ entryId, ownerId }: { entryId: string; ownerId?: string }) {
   const { account } = useLibrary();
+  const { t, f, href } = useI18n();
   const myId = account && !account.isAnonymous && account.username ? account.id : null;
   const [state, setState] = useState<{ count: number; mine: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -22,16 +24,16 @@ export function LikeButton({ entryId, ownerId }: { entryId: string; ownerId?: st
   }, [entryId, myId]);
 
   if (!state) return null;
-  const label = `${state.count} j'aime`;
+  const label = f(t.like.count, { n: state.count });
 
   // Son propre avis, ou visiteur sans compte : on affiche seulement le nombre
   if (!myId || myId === ownerId) {
     return (
-      <span className="like like--static" title={myId ? undefined : "Créez un compte pour aimer les avis"}>
+      <span className="like like--static" title={myId ? undefined : t.like.createAccountHint}>
         <span aria-hidden="true">♥</span> {label}
         {!myId && (
           <>
-            {" "}· <Link href="/compte">Se connecter pour aimer</Link>
+            {" "}· <Link href={href("/compte")}>{t.like.signInToLike}</Link>
           </>
         )}
       </span>

@@ -1,24 +1,27 @@
 <!--
   Modèle « Change Email Address » de Supabase (Authentication > Emails > Templates).
-  Sujet à mettre : Confirmez votre adresse — Codex
   C'est cet e-mail qui est envoyé à l'inscription (la session sans compte reçoit une adresse).
+  L'e-mail s'écrit tout seul dans la langue du compte (français, anglais, espagnol ou portugais).
+
+  Le sujet de l'e-mail est expliqué dans le README (étape 11).
+  Attention : ne pas écrire d'accolades dans ce commentaire.
 -->
+{{ $l := "fr" }}{{ with .Data.lang }}{{ $l = . }}{{ end }}
 <div style="font-family: Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; color: #16302f;">
   <h1 style="color: #0f6b6b; font-size: 26px; margin-bottom: 8px; font-style: italic;">Codex</h1>
   <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
-    Bonjour,
+    {{ if eq $l "en" }}Hello,{{ else if eq $l "es" }}Hola:{{ else if eq $l "pt" }}Olá,{{ else }}Bonjour,{{ end }}
   </p>
   <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
-    Pour activer votre compte, confirmez votre adresse e-mail en cliquant sur le bouton
-    ci-dessous.
+    {{ if eq $l "en" }}To activate your account, confirm your email address by clicking the button below.{{ else if eq $l "es" }}Para activar tu cuenta, confirma tu correo electrónico haciendo clic en el botón de abajo.{{ else if eq $l "pt" }}Para ativar sua conta, confirme seu e-mail clicando no botão abaixo.{{ else }}Pour activer votre compte, confirmez votre adresse e-mail en cliquant sur le bouton ci-dessous.{{ end }}
   </p>
   <p style="margin: 28px 0;">
-    <a href="{{ .SiteURL }}/compte/lien?token_hash={{ .TokenHash }}&type=email_change"
+    <a href="{{ .SiteURL }}{{ if ne $l "fr" }}/{{ $l }}{{ end }}/compte/lien?token_hash={{ .TokenHash }}&type=email_change"
        style="background: #0f6b6b; color: #ffffff; padding: 14px 24px; border-radius: 10px; text-decoration: none; font-family: Arial, sans-serif; font-weight: bold; font-size: 16px;">
-      Confirmer mon adresse
+      {{ if eq $l "en" }}Confirm my email{{ else if eq $l "es" }}Confirmar mi correo{{ else if eq $l "pt" }}Confirmar meu e-mail{{ else }}Confirmer mon adresse{{ end }}
     </a>
   </p>
   <p style="font-family: Arial, sans-serif; font-size: 13px; color: #5b7371; line-height: 1.5;">
-    Vous n'êtes pas à l'origine de cette inscription ? Ignorez simplement cet e-mail.
+    {{ if eq $l "en" }}Didn't sign up? Simply ignore this email.{{ else if eq $l "es" }}¿No te has registrado tú? Simplemente ignora este correo.{{ else if eq $l "pt" }}Não foi você que se cadastrou? É só ignorar este e-mail.{{ else }}Vous n'êtes pas à l'origine de cette inscription ? Ignorez simplement cet e-mail.{{ end }}
   </p>
 </div>

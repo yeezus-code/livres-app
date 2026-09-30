@@ -1,6 +1,7 @@
 "use client";
 
-import { formatDate, type LibraryEntry } from "@/lib/library";
+import { useI18n } from "@/i18n/I18nProvider";
+import type { LibraryEntry } from "@/lib/library";
 import { BookCover } from "./BookCover";
 import { Stars } from "./StarRating";
 
@@ -12,6 +13,7 @@ export function BookGrid({
   entries: LibraryEntry[];
   onSelect: (entry: LibraryEntry) => void;
 }) {
+  const { t, f, date } = useI18n();
   return (
     <ul className="grid">
       {entries.map((entry) => (
@@ -21,8 +23,10 @@ export function BookGrid({
             <span className="tile__title">{entry.title}</span>
             {entry.authors[0] && <span className="tile__author">{entry.authors[0]}</span>}
             <Stars value={entry.rating} />
-            {entry.read_on && <span className="tile__date">Lu le {formatDate(entry.read_on)}</span>}
-            {entry.review && <span className="tile__review">« {entry.review} »</span>}
+            {entry.read_on && <span className="tile__date">{f(t.common.readOn, { date: date(entry.read_on) })}</span>}
+            {entry.review && (
+              <span className="tile__review">{f(t.common.quote, { text: entry.review })}</span>
+            )}
           </button>
         </li>
       ))}

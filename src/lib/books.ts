@@ -1,5 +1,6 @@
 // Recherche de livres : Open Library en priorité, Google Books en complément.
 // Ce fichier ne tourne que côté serveur (appelé par /api/recherche).
+import type { Locale } from "@/i18n/config";
 
 export type Book = {
   /** Identifiant stable : "ol:OL45883W" (Open Library) ou "gb:xxxx" (Google Books) */
@@ -13,6 +14,20 @@ export type Book = {
 
 const TIMEOUT_MS = 6000;
 const MAX_RESULTS = 20;
+
+/**
+ * Codes de langue attendus par chaque source. Les titres et les couvertures sont pris
+ * dans une édition de la langue du visiteur quand elle existe.
+ */
+const SOURCE_LANGS: Record<Locale, { openLibrary: string; edition: string; google: string }> = {
+  fr: { openLibrary: "fr", edition: "fre", google: "fr" },
+  en: { openLibrary: "en", edition: "eng", google: "en" },
+  es: { openLibrary: "es", edition: "spa", google: "es" },
+  pt: { openLibrary: "pt", edition: "por", google: "pt" },
+};
+
+/** Un résultat, avec « localized » = titre et couverture pris dans une édition de la bonne langue. */
+type Found = Book & { localized: boolean };
 
 // ---------------------------------------------------------------------------
 // Genres : les deux sources renvoient des « sujets » en anglais, souvent très
@@ -90,6 +105,8 @@ function sameBook(a: Book, b: Book): boolean {
 // ---------------------------------------------------------------------------
 // Open Library — https://openlibrary.org/dev/docs/api/search
 // ---------------------------------------------------------------------------
+type OpenLibraryEdition = { title?: string; cover_i?: number; language?: string[] };
+
 type OpenLibraryDoc = {
   key: string; // "/works/OL45883W"
   title: string;
@@ -97,15 +114,24 @@ type OpenLibraryDoc = {
   first_publish_year?: number;
   cover_i?: number;
   subject?: string[];
+  /** La meilleure édition dans la langue demandée (« lang ») */
+  editions?: { docs?: OpenLibraryEdition[] };
 };
 
-async function searchOpenLibrary(title: string, author?: string): Promise<Book[]> {
+const coverFromId = (id: number) => `https://covers.openlibrary.org/b/id/${id}-M.jpg`;
+
+async function searchOpenLibrary(title: string, author: string | undefined, locale: Locale): Promise<Found[]> {
+  const langs = SOURCE_LANGS[locale];
   const url = new URL("https://openlibrary.org/search.json");
   url.searchParams.set("title", title);
   if (author) url.searchParams.set("author", author);
-  url.searchParams.set("fields", "key,title,author_name,first_publish_year,cover_i,subject");
+  url.searchParams.set(
+    "fields",
+    "key,title,author_name,first_publish_year,cover_i,subject," +
+      "editions,editions.title,editions.cover_i,editions.language",
+  );
   url.searchParams.set("limit", String(MAX_RESULTS));
-  url.searchParams.set("lang", "fr"); // privilégie les titres des éditions françaises
+  url.searchParams.set("lang", langs.openLibrary); // choisit une édition dans cette langue
 
   const res = await fetch(url, {
     // Open Library demande d'identifier les applications qui utilisent son API
@@ -115,14 +141,20 @@ async function searchOpenLibrary(title: string, author?: string): Promise<Book[]
   if (!res.ok) throw new Error(`Open Library a répondu ${res.status}`);
   const data: { docs?: OpenLibraryDoc[] } = await res.json();
 
-  return (data.docs ?? []).map((doc) => ({
-    id: "ol:" + doc.key.replace("/works/", ""),
-    title: doc.title,
-    authors: doc.author_name?.slice(0, 3) ?? [],
-    coverUrl: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : null,
-    genres: toGenres(doc.subject),
-    year: doc.first_publish_year ?? null,
-  }));
+  return (data.docs ?? []).map((doc) => {
+    const edition = doc.editions?.docs?.[0];
+    const localized = Boolean(edition?.language?.includes(langs.edition));
+    const coverId = (localized && edition?.cover_i) || doc.cover_i;
+    return {
+      id: "ol:" + doc.key.replace("/works/", ""),
+      title: (localized && edition?.title) || doc.title,
+      authors: doc.author_name?.slice(0, 3) ?? [],
+      coverUrl: coverId ? coverFromId(coverId) : null,
+      genres: toGenres(doc.subject),
+      year: doc.first_publish_year ?? null,
+      localized: localized && Boolean(edition?.cover_i),
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -146,11 +178,13 @@ function googleCover(links: GoogleVolume["volumeInfo"]["imageLinks"]): string | 
   return raw.replace(/^http:/, "https:").replace("&edge=curl", "");
 }
 
-async function searchGoogleBooks(title: string, author?: string): Promise<Book[]> {
+async function searchGoogleBooks(title: string, author: string | undefined, locale: Locale): Promise<Found[]> {
   const url = new URL("https://www.googleapis.com/books/v1/volumes");
   url.searchParams.set("q", `intitle:${title}` + (author ? ` inauthor:${author}` : ""));
   url.searchParams.set("maxResults", String(MAX_RESULTS));
   url.searchParams.set("printType", "books");
+  // Seulement les éditions dans la langue du visiteur (et donc leurs couvertures)
+  url.searchParams.set("langRestrict", SOURCE_LANGS[locale].google);
   const key = process.env.GOOGLE_BOOKS_API_KEY;
   if (key) url.searchParams.set("key", key);
 
@@ -170,6 +204,7 @@ async function searchGoogleBooks(title: string, author?: string): Promise<Book[]
         coverUrl: googleCover(info.imageLinks),
         genres: toGenres(info.categories),
         year: Number.isNaN(year) ? null : year,
+        localized: true,
       };
     });
 }
@@ -177,17 +212,18 @@ async function searchGoogleBooks(title: string, author?: string): Promise<Book[]
 // ---------------------------------------------------------------------------
 // Fusion des deux sources
 // ---------------------------------------------------------------------------
-export function mergeResults(openLibrary: Book[], google: Book[]): Book[] {
+export function mergeResults(openLibrary: Found[], google: Found[]): Book[] {
   const usedGoogle = new Set<string>();
 
-  // 1. On complète les résultats Open Library (couverture manquante, genres) avec Google
-  const merged = openLibrary.map((book) => {
+  // 1. On complète les résultats Open Library avec Google : genres, et couverture si Open
+  //    Library n'en a pas dans la bonne langue (Google ne renvoie que des éditions de cette langue)
+  const merged: Found[] = openLibrary.map((book) => {
     const match = google.find((g) => !usedGoogle.has(g.id) && sameBook(book, g));
     if (!match) return book;
     usedGoogle.add(match.id);
     return {
       ...book,
-      coverUrl: book.coverUrl ?? match.coverUrl,
+      coverUrl: book.localized ? book.coverUrl : (match.coverUrl ?? book.coverUrl),
       genres: dropGenericGenre([...new Set([...book.genres, ...match.genres])]).slice(0, 3),
     };
   });
@@ -204,13 +240,15 @@ export function mergeResults(openLibrary: Book[], google: Book[]): Book[] {
   return merged
     .map((book, index) => ({ book, index }))
     .sort((a, b) => Number(!a.book.coverUrl) - Number(!b.book.coverUrl) || a.index - b.index)
-    .map(({ book }) => book);
+    .map(({ book: { id, title, authors, coverUrl, genres, year } }) => ({
+      id, title, authors, coverUrl, genres, year,
+    }));
 }
 
-export async function searchBooks(title: string, author?: string): Promise<Book[]> {
+export async function searchBooks(title: string, author?: string, locale: Locale = "fr"): Promise<Book[]> {
   const [ol, gb] = await Promise.allSettled([
-    searchOpenLibrary(title, author),
-    searchGoogleBooks(title, author),
+    searchOpenLibrary(title, author, locale),
+    searchGoogleBooks(title, author, locale),
   ]);
 
   if (ol.status === "rejected") console.error("Open Library :", ol.reason);
@@ -232,15 +270,24 @@ type GoogleVolumeDetails = GoogleVolume & {
   volumeInfo: GoogleVolume["volumeInfo"] & { pageCount?: number; language?: string };
 };
 
-/** Les romans en français parus ces derniers mois, avec couverture. */
-export async function latestReleases(max = 18): Promise<Book[]> {
-  const queries = ["subject:fiction", "subject:roman", 'subject:"literary fiction"'];
+/** Mots-clés de recherche des romans, par langue (en plus de « fiction »). */
+const NOVEL_SUBJECTS: Record<Locale, string[]> = {
+  fr: ["subject:roman", 'subject:"literary fiction"'],
+  en: ['subject:"literary fiction"', 'subject:"fiction / general"'],
+  es: ["subject:novela", 'subject:"literary fiction"'],
+  pt: ["subject:romance", 'subject:"literary fiction"'],
+};
+
+/** Les romans parus ces derniers mois dans la langue du visiteur, avec couverture. */
+export async function latestReleases(locale: Locale, max = 18): Promise<Book[]> {
+  const lang = SOURCE_LANGS[locale].google;
+  const queries = ["subject:fiction", ...NOVEL_SUBJECTS[locale]];
   const responses = await Promise.allSettled(
     queries.map(async (q) => {
       const url = new URL("https://www.googleapis.com/books/v1/volumes");
       url.searchParams.set("q", q);
       url.searchParams.set("orderBy", "newest");
-      url.searchParams.set("langRestrict", "fr");
+      url.searchParams.set("langRestrict", lang);
       url.searchParams.set("printType", "books");
       url.searchParams.set("maxResults", "40");
       const key = process.env.GOOGLE_BOOKS_API_KEY;
@@ -266,7 +313,7 @@ export async function latestReleases(max = 18): Promise<Book[]> {
     const info = item.volumeInfo;
     const published = new Date(info.publishedDate ?? "");
     if (!info.title || !info.authors?.length || !info.imageLinks) continue;
-    if (info.language && info.language !== "fr") continue;
+    if (info.language && info.language !== lang) continue;
     if (Number.isNaN(published.getTime()) || published < oldest || published > now) continue;
     if (info.pageCount !== undefined && info.pageCount < 80) continue; // brochures, nouvelles isolées
     const book: Book = {

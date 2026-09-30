@@ -14,6 +14,7 @@ import {
 } from "@/lib/account";
 import { bookToRow, type EntryInput, type LibraryEntry } from "@/lib/library";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Status = "loading" | "ready" | "unconfigured" | "error";
 
@@ -118,9 +119,7 @@ async function loadEverything(supabase: SupabaseClient) {
 
 async function assertUsernameAvailable(supabase: SupabaseClient, username: string) {
   if (!USERNAME_PATTERN.test(username)) {
-    throw new AccountError(
-      "Pseudo : 3 à 20 caractères, lettres sans accent, chiffres ou « _ » uniquement.",
-    );
+    throw new AccountError("usernameInvalid");
   }
   const { data, error } = await supabase
     .from("profiles")
@@ -128,7 +127,7 @@ async function assertUsernameAvailable(supabase: SupabaseClient, username: strin
     .eq("username", username)
     .maybeSingle();
   if (error) throw error;
-  if (data) throw new AccountError("Ce pseudo est déjà pris.");
+  if (data) throw new AccountError("usernameTaken");
 }
 
 async function insertProfile(supabase: SupabaseClient, username: string) {
@@ -139,6 +138,7 @@ async function insertProfile(supabase: SupabaseClient, username: string) {
 }
 
 export function LibraryProvider({ children }: { children: React.ReactNode }) {
+  const { locale, href } = useI18n();
   const [status, setStatus] = useState<Status>(isSupabaseConfigured ? "loading" : "unconfigured");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [account, setAccount] = useState<Account | null>(null);
@@ -163,7 +163,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     if (!isSupabaseConfigured) return; // état « unconfigured » dès le départ
     // Sur la page des liens reçus par e-mail, c'est cette page qui ouvre la session
     // (sinon une session anonyme risquerait de prendre la place de la bonne).
-    if (window.location.pathname === EMAIL_LINK_PATH) return;
+    if (window.location.pathname.endsWith(EMAIL_LINK_PATH)) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- chargement initial depuis Supabase
     reload();
   }, [reload]);
@@ -236,9 +236,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       // La session anonyme reçoit un e-mail et un mot de passe : c'est le même
       // utilisateur, donc sa bibliothèque est conservée telle quelle.
       // Le pseudo est mis de côté dans le compte, au cas où l'adresse doive d'abord être confirmée.
+      // La langue sert à envoyer les e-mails (confirmation, mot de passe oublié) dans la bonne langue.
       const { data, error } = await supabase.auth.updateUser(
-        { email: email.trim(), password, data: { pending_username: cleanName } },
-        { emailRedirectTo: window.location.origin + EMAIL_LINK_PATH },
+        { email: email.trim(), password, data: { pending_username: cleanName, lang: locale } },
+        { emailRedirectTo: window.location.origin + href(EMAIL_LINK_PATH) },
       );
       if (error) throw error;
       if (data.user.is_anonymous) {
@@ -259,7 +260,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         await reload();
       }
     },
-    [reload],
+    [reload, locale, href],
   );
 
   const signIn = useCallback(
@@ -337,10 +338,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const sendPasswordReset = useCallback(async (email: string) => {
     const { error } = await requireSupabase().auth.resetPasswordForEmail(email.trim(), {
       // « next=recovery » : utile seulement avec le modèle d'e-mail d'origine de Supabase
-      redirectTo: `${window.location.origin}${EMAIL_LINK_PATH}?next=recovery`,
+      redirectTo: `${window.location.origin}${href(EMAIL_LINK_PATH)}?next=recovery`,
     });
     if (error) throw error;
-  }, []);
+  }, [href]);
 
   const resendConfirmation = useCallback(async () => {
     if (!account?.pendingEmail) return;

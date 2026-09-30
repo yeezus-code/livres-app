@@ -1,23 +1,26 @@
 <!--
   Modèle « Reset Password » de Supabase (Authentication > Emails > Templates).
-  Sujet à mettre : Nouveau mot de passe — Codex
+  L'e-mail s'écrit tout seul dans la langue du compte (français, anglais, espagnol ou portugais).
+
+  Le sujet de l'e-mail est expliqué dans le README (étape 11).
+  Attention : ne pas écrire d'accolades dans ce commentaire.
 -->
+{{ $l := "fr" }}{{ with .Data.lang }}{{ $l = . }}{{ end }}
 <div style="font-family: Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; color: #16302f;">
   <h1 style="color: #0f6b6b; font-size: 26px; margin-bottom: 8px; font-style: italic;">Codex</h1>
   <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
-    Bonjour,
+    {{ if eq $l "en" }}Hello,{{ else if eq $l "es" }}Hola:{{ else if eq $l "pt" }}Olá,{{ else }}Bonjour,{{ end }}
   </p>
   <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
-    Vous avez demandé à changer le mot de passe de votre compte. Cliquez sur le bouton
-    ci-dessous pour en choisir un nouveau. Ce lien ne fonctionne qu'une fois, pendant une heure.
+    {{ if eq $l "en" }}You asked to change your password. Click the button below to choose a new one. This link works only once, for one hour.{{ else if eq $l "es" }}Has pedido cambiar tu contraseña. Haz clic en el botón de abajo para elegir una nueva. Este enlace solo funciona una vez, durante una hora.{{ else if eq $l "pt" }}Você pediu para trocar sua senha. Clique no botão abaixo para escolher uma nova. Este link só funciona uma vez, por uma hora.{{ else }}Vous avez demandé à changer votre mot de passe. Cliquez sur le bouton ci-dessous pour en choisir un nouveau. Ce lien ne fonctionne qu'une fois, pendant une heure.{{ end }}
   </p>
   <p style="margin: 28px 0;">
-    <a href="{{ .SiteURL }}/compte/lien?token_hash={{ .TokenHash }}&type=recovery"
+    <a href="{{ .SiteURL }}{{ if ne $l "fr" }}/{{ $l }}{{ end }}/compte/lien?token_hash={{ .TokenHash }}&type=recovery"
        style="background: #0f6b6b; color: #ffffff; padding: 14px 24px; border-radius: 10px; text-decoration: none; font-family: Arial, sans-serif; font-weight: bold; font-size: 16px;">
-      Choisir un nouveau mot de passe
+      {{ if eq $l "en" }}Choose a new password{{ else if eq $l "es" }}Elegir una nueva contraseña{{ else if eq $l "pt" }}Escolher uma nova senha{{ else }}Choisir un nouveau mot de passe{{ end }}
     </a>
   </p>
   <p style="font-family: Arial, sans-serif; font-size: 13px; color: #5b7371; line-height: 1.5;">
-    Vous n'avez rien demandé ? Ignorez cet e-mail : votre mot de passe actuel reste valable.
+    {{ if eq $l "en" }}Didn't ask for this? Ignore this email: your password stays the same.{{ else if eq $l "es" }}¿No lo has pedido tú? Ignora este correo: tu contraseña no cambia.{{ else if eq $l "pt" }}Não foi você? Ignore este e-mail: sua senha continua a mesma.{{ else }}Vous n'avez rien demandé ? Ignorez cet e-mail : votre mot de passe reste inchangé.{{ end }}
   </p>
 </div>

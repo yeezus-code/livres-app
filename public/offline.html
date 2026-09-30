@@ -30,5 +30,21 @@
     <p>Codex a besoin d'Internet pour afficher vos livres. Vérifiez votre réseau, puis réessayez.</p>
     <button onclick="location.reload()">Réessayer</button>
   </main>
+  <script>
+    // Même texte dans la langue de la page demandée (/en/…, /es/…, /pt/…)
+    var texts = {
+      en: ["No connection", "Codex needs the Internet to show your books. Check your network, then try again.", "Try again"],
+      es: ["Sin conexión", "Codex necesita Internet para mostrar tus libros. Revisa tu red y vuelve a intentarlo.", "Reintentar"],
+      pt: ["Sem conexão", "O Codex precisa de internet para mostrar seus livros. Verifique sua rede e tente novamente.", "Tentar de novo"]
+    };
+    var t = texts[location.pathname.split("/")[1]];
+    if (t) {
+      document.documentElement.lang = location.pathname.split("/")[1];
+      document.querySelector("h1").textContent = t[0];
+      document.querySelector("p").textContent = t[1];
+      document.querySelector("button").textContent = t[2];
+      document.title = t[0] + " — Codex";
+    }
+  </script>
 </body>
 </html>

@@ -1622,7 +1622,7 @@ p.with-avatar { display: flex; }
 
 /* ==========================================================================
    Sélections de saison : bandeau sombre aux couleurs de la saison
-   (couleurs réglées dans src/lib/collections.ts)
+   (couleurs réglées dans src/collections/themes.ts)
    ========================================================================== */
 .season {
   position: relative;
@@ -1703,3 +1703,17 @@ p.with-avatar { display: flex; }
 /* Sélection du moment collée au grand bandeau d'accueil */
 .hero + .season { margin-top: 0; }
 .hero + .season::before { border-top: 0; }
+
+/* Choix de la langue, dans le pied de page */
+.lang-picker { display: block; margin-top: 1.25rem; }
+.lang-picker .footer__title { display: block; }
+.lang-picker select {
+  min-height: 40px;
+  padding: 0.35rem 2rem 0.35rem 0.75rem;
+  border: 1px solid rgb(247 243 234 / 0.25);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.06);
+  color: var(--on-ink);
+  font: inherit;
+}
+.lang-picker option { color: #1f2a28; }

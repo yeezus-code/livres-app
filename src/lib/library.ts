@@ -42,16 +42,6 @@ export function isRead(entry: LibraryEntry) {
   return (entry.status ?? "lu") === "lu";
 }
 
-/** « 2026-03-12 » → « 12 mars 2026 » */
-export function formatDate(iso: string) {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
 /** La date du jour au format AAAA-MM-JJ (heure locale) */
 export function today() {
   const now = new Date();

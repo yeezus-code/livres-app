@@ -2,12 +2,14 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Props = { src: string | null; title: string; size?: "sm" | "md" | "lg" };
 
 /** Couverture du livre, ou une couverture de remplacement avec le titre. */
 export function BookCover({ src: rawSrc, title, size = "md" }: Props) {
   const [failed, setFailed] = useState(false);
+  const { t, f } = useI18n();
   // Grande couverture : on demande la version haute définition à Open Library
   const src = size === "lg" && rawSrc ? rawSrc.replace(/-M\.jpg$/, "-L.jpg") : rawSrc;
 
@@ -23,7 +25,7 @@ export function BookCover({ src: rawSrc, title, size = "md" }: Props) {
     <img
       className={`cover cover--${size}`}
       src={src}
-      alt={`Couverture de « ${title} »`}
+      alt={f(t.common.coverOf, { title })}
       loading="lazy"
       onError={() => setFailed(true)}
     />

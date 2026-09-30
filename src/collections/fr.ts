@@ -1,0 +1,138 @@
+// Sélections affichées en français. Voir le mode d'emploi dans src/lib/collections.ts.
+import { THEMES, type BookRef, type Collection } from "./themes";
+
+export const collections: Collection[] = [
+  {
+    id: "classiques",
+    title: "Les grands classiques",
+    subtitle: "Les incontournables, à lire au moins une fois.",
+    theme: THEMES.classiques,
+    books: [
+      { title: "L'Étranger", author: "Albert Camus" },
+      { title: "Les Misérables", author: "Victor Hugo" },
+      { title: "Madame Bovary", author: "Gustave Flaubert" },
+      { title: "Le Petit Prince", author: "Antoine de Saint-Exupéry" },
+      { title: "1984", author: "George Orwell" },
+      { title: "Orgueil et préjugés", author: "Jane Austen" },
+      { title: "Crime et châtiment", author: "Fiodor Dostoïevski" },
+      { title: "Cent ans de solitude", author: "Gabriel García Márquez" },
+      { title: "Le Comte de Monte-Cristo", author: "Alexandre Dumas" },
+      { title: "Germinal", author: "Émile Zola" },
+      { title: "Le Rouge et le Noir", author: "Stendhal" },
+      { title: "Du côté de chez Swann", author: "Marcel Proust" },
+    ],
+  },
+  {
+    id: "rentree",
+    title: "C'est la rentrée",
+    subtitle: "Cartables, souvenirs d'école et premières fois.",
+    season: { from: "09-01", to: "10-15" },
+    theme: THEMES.rentree,
+    books: [
+      { title: "Le Grand Meaulnes", author: "Alain-Fournier" },
+      { title: "Le Petit Nicolas", author: "René Goscinny" },
+      { title: "La Gloire de mon père", author: "Marcel Pagnol" },
+      { title: "Le Cercle des poètes disparus", author: "N. H. Kleinbaum" },
+      { title: "L'Attrape-cœurs", author: "J. D. Salinger" },
+      { title: "Harry Potter à l'école des sorciers", author: "J. K. Rowling" },
+    ],
+  },
+  {
+    id: "halloween",
+    title: "Frissons d'Halloween",
+    subtitle: "À lire la lumière allumée.",
+    season: { from: "10-16", to: "11-02" },
+    theme: THEMES.halloween,
+    books: [
+      { title: "Frankenstein", author: "Mary Shelley" },
+      { title: "Dracula", author: "Bram Stoker" },
+      { title: "Shining", author: "Stephen King" },
+      { title: "Ça", author: "Stephen King" },
+      { title: "Rebecca", author: "Daphne du Maurier" },
+      { title: "Le Tour d'écrou", author: "Henry James" },
+    ],
+  },
+  {
+    id: "couette",
+    title: "Sous la couette",
+    subtitle: "Des livres doudous pour les longues soirées d'hiver.",
+    season: { from: "11-03", to: "02-28" },
+    theme: THEMES.couette,
+    books: [
+      { title: "Le Cercle littéraire des amateurs d'épluchures de patates", author: "Mary Ann Shaffer" },
+      { title: "Les Délices de Tokyo", author: "Durian Sukegawa" },
+      { title: "La Tresse", author: "Laetitia Colombani" },
+      { title: "La Vie devant soi", author: "Romain Gary" },
+      { title: "Jane Eyre", author: "Charlotte Brontë" },
+      { title: "Le Hobbit", author: "J. R. R. Tolkien" },
+      { title: "Ensemble, c'est tout", author: "Anna Gavalda" },
+    ],
+  },
+  {
+    id: "noel",
+    title: "Lectures de Noël",
+    subtitle: "Des histoires qui sentent le sapin et le chocolat chaud.",
+    season: { from: "12-01", to: "12-31" },
+    theme: THEMES.noel,
+    books: [
+      { title: "Un chant de Noël", author: "Charles Dickens" },
+      { title: "Le Noël d'Hercule Poirot", author: "Agatha Christie" },
+      { title: "Les Quatre Filles du docteur March", author: "Louisa May Alcott" },
+      { title: "Casse-Noisette et le Roi des souris", author: "E. T. A. Hoffmann" },
+      { title: "Le Pôle Express", author: "Chris Van Allsburg" },
+      { title: "La Petite Fille aux allumettes", author: "Hans Christian Andersen" },
+    ],
+  },
+  {
+    id: "saint-valentin",
+    title: "Histoires d'amour",
+    subtitle: "Pour la Saint-Valentin, ou pour toute l'année.",
+    season: { from: "02-01", to: "02-15" },
+    theme: THEMES.amour,
+    books: [
+      { title: "Roméo et Juliette", author: "William Shakespeare" },
+      { title: "Belle du Seigneur", author: "Albert Cohen" },
+      { title: "Les Hauts de Hurlevent", author: "Emily Brontë" },
+      { title: "Le Temps de l'innocence", author: "Edith Wharton" },
+      { title: "Autant en emporte le vent", author: "Margaret Mitchell" },
+      { title: "Orgueil et préjugés", author: "Jane Austen" },
+    ],
+  },
+  {
+    id: "printemps",
+    title: "Le printemps des lecteurs",
+    subtitle: "Des livres lumineux pour les beaux jours qui reviennent.",
+    season: { from: "03-01", to: "06-14" },
+    theme: THEMES.printemps,
+    books: [
+      { title: "Le Jardin secret", author: "Frances Hodgson Burnett" },
+      { title: "L'Élégance du hérisson", author: "Muriel Barbery" },
+      { title: "Le Liseur du 6h27", author: "Jean-Paul Didierlaurent" },
+      { title: "Mange, prie, aime", author: "Elizabeth Gilbert" },
+      { title: "Chocolat", author: "Joanne Harris" },
+      { title: "Le Vieux qui ne voulait pas fêter son anniversaire", author: "Jonas Jonasson" },
+    ],
+  },
+  {
+    id: "plage",
+    title: "Les indispensables de la plage",
+    subtitle: "Des pages qui se tournent toutes seules, les pieds dans le sable.",
+    season: { from: "06-15", to: "08-31" },
+    theme: THEMES.plage,
+    books: [
+      { title: "L'Amie prodigieuse", author: "Elena Ferrante" },
+      { title: "La Vérité sur l'affaire Harry Quebert", author: "Joël Dicker" },
+      { title: "Bonjour tristesse", author: "Françoise Sagan" },
+      { title: "Ils étaient dix", author: "Agatha Christie" },
+      { title: "Le Vieil Homme et la Mer", author: "Ernest Hemingway" },
+      { title: "Tendre est la nuit", author: "F. Scott Fitzgerald" },
+      { title: "Le Comte de Monte-Cristo", author: "Alexandre Dumas" },
+    ],
+  },
+];
+
+// Dernières sorties : laissez cette liste vide pour que Codex aille chercher tout seul
+// les romans en français les plus récents (Google Books). Pour choisir vous-même les
+// nouveautés mises en avant, écrivez-les ici, par exemple :
+//   { title: "Titre du livre", author: "Nom de l'auteur" },
+export const newReleases: BookRef[] = [];

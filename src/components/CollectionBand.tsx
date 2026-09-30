@@ -4,22 +4,24 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Book } from "@/lib/books";
 import type { Collection } from "@/lib/collections";
+import { useI18n } from "@/i18n/I18nProvider";
 import { BookShelf } from "./BookShelf";
 
 /** Les livres d'une sélection (null tant qu'ils chargent). */
 export function useCollectionBooks(id: string, enabled = true): Book[] | null {
+  const { locale } = useI18n();
   const [books, setBooks] = useState<Book[] | null>(null);
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
-    fetch(`/api/liste?id=${encodeURIComponent(id)}`)
+    fetch(`/api/liste?id=${encodeURIComponent(id)}&lang=${locale}`)
       .then((res) => res.json())
       .then((data) => !cancelled && setBooks(data.books ?? []))
       .catch(() => !cancelled && setBooks([]));
     return () => {
       cancelled = true;
     };
-  }, [id, enabled]);
+  }, [id, enabled, locale]);
   return books;
 }
 
@@ -44,6 +46,7 @@ export function CollectionBand({
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(delay === 0);
   const books = useCollectionBooks(collection.id, visible);
+  const { t, href } = useI18n();
 
   useEffect(() => {
     if (visible || !ref.current) return;
@@ -82,8 +85,8 @@ export function CollectionBand({
           <p className="season__subtitle">{collection.subtitle}</p>
         </div>
         {showAllLink && (
-          <Link href="/selections" className="season__link">
-            Toutes les sélections →
+          <Link href={href("/selections")} className="season__link">
+            {t.home.allSelections}
           </Link>
         )}
       </div>

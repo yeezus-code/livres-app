@@ -12,7 +12,7 @@ export type PublicProfile = Profile & {
 
 export type ActivityItem = { entry: LibraryEntry; author: Profile };
 
-/** Adresse de la page publique d'un lecteur. */
+/** Adresse de la page publique d'un lecteur (sans la langue : passer par href()). */
 export function profileHref(username: string) {
   return `/u/${username}`;
 }
@@ -116,22 +116,4 @@ export async function searchReaders(supabase: SupabaseClient, query: string): Pr
   const { data, error } = await request.limit(20);
   if (error) throw error;
   return data as Profile[];
-}
-
-/** « il y a 3 jours » */
-export function timeAgo(iso: string): string {
-  const seconds = (new Date(iso).getTime() - Date.now()) / 1000;
-  const rtf = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
-  const steps: [Intl.RelativeTimeFormatUnit, number][] = [
-    ["year", 31536000],
-    ["month", 2592000],
-    ["week", 604800],
-    ["day", 86400],
-    ["hour", 3600],
-    ["minute", 60],
-  ];
-  for (const [unit, size] of steps) {
-    if (Math.abs(seconds) >= size) return rtf.format(Math.round(seconds / size), unit);
-  }
-  return "à l'instant";
 }

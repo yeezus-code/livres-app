@@ -9,7 +9,7 @@ const SIZE = 256;
  */
 export async function prepareAvatar(file: File): Promise<Blob> {
   if (!file.type.startsWith("image/")) {
-    throw new AccountError("Ce fichier n'est pas une image.");
+    throw new AccountError("notImage");
   }
 
   let bitmap: ImageBitmap;
@@ -17,7 +17,7 @@ export async function prepareAvatar(file: File): Promise<Blob> {
     bitmap = await createImageBitmap(file);
   } catch {
     // Ex. photos HEIC d'iPhone que certains navigateurs ne savent pas lire
-    throw new AccountError("Format d'image non reconnu. Essayez une photo JPEG ou PNG.");
+    throw new AccountError("imageFormat");
   }
 
   const side = Math.min(bitmap.width, bitmap.height);
@@ -42,7 +42,7 @@ export async function prepareAvatar(file: File): Promise<Blob> {
 
   return new Promise((resolve, reject) =>
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new AccountError("Impossible de préparer l'image."))),
+      (blob) => (blob ? resolve(blob) : reject(new AccountError("imagePrepare"))),
       "image/jpeg",
       0.85,
     ),

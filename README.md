@@ -158,7 +158,7 @@ dans le menu Storage.)
 Test : onglet **Moi** → **Ajouter une photo**. Page d'accueil : les sections « mieux notés »,
 « plus lus » et « derniers avis » se remplissent au fil des notes des lecteurs.
 
-Pour changer la liste des grands classiques : fichier [`src/lib/classics.ts`](src/lib/classics.ts).
+Pour changer la liste des grands classiques : première sélection du fichier de la langue, dans [`src/collections`](src/collections) (voir « Modifier les sélections » plus bas).
 
 ### Étape 9 — Brancher un vrai service d'e-mails
 
@@ -252,22 +252,59 @@ e-mails. Le plus simple, gratuit : une **redirection** vers votre boîte Gmail a
 
 ---
 
+### Étape 11 — E-mails en 4 langues
+
+Codex existe en français (`codexby.app`), anglais (`/en`), espagnol (`/es`) et portugais du
+Brésil (`/pt`). Les e-mails s'écrivent tout seuls dans la langue du compte, à condition de
+recoller les deux modèles, qui ont changé :
+
+1. Supabase → **Authentication** → **Emails** → onglet **Templates** → **Change Email Address** :
+   - *Subject* : copiez cette ligne en entier
+     ```
+     {{ $l := "fr" }}{{ with .Data.lang }}{{ $l = . }}{{ end }}{{ if eq $l "en" }}Confirm your email — Codex{{ else if eq $l "es" }}Confirma tu correo — Codex{{ else if eq $l "pt" }}Confirme seu e-mail — Codex{{ else }}Confirmez votre adresse — Codex{{ end }}
+     ```
+   - *Body* : remplacez tout par le contenu de
+     [`supabase/emails/confirmer-adresse.html`](supabase/emails/confirmer-adresse.html). **Save**.
+2. Même chose pour **Reset Password** :
+   - *Subject* :
+     ```
+     {{ $l := "fr" }}{{ with .Data.lang }}{{ $l = . }}{{ end }}{{ if eq $l "en" }}Reset your password — Codex{{ else if eq $l "es" }}Nueva contraseña — Codex{{ else if eq $l "pt" }}Nova senha — Codex{{ else }}Nouveau mot de passe — Codex{{ end }}
+     ```
+   - *Body* : contenu de [`supabase/emails/mot-de-passe-oublie.html`](supabase/emails/mot-de-passe-oublie.html). **Save**.
+3. Test : « Mot de passe oublié ? » sur votre compte → l'e-mail doit avoir un sujet normal.
+   Si le sujet reçu montre des accolades, remplacez-le simplement par
+   `Nouveau mot de passe — Codex` (et `Confirmez votre adresse — Codex`) : le texte de
+   l'e-mail, lui, restera dans la bonne langue.
+
+La langue d'un compte est celle du site au moment de l'inscription ; elle change quand la
+personne choisit une autre langue dans le menu en bas de page.
+
 ### Modifier les sélections de saison et les dernières sorties
 
-Tout se trouve dans un seul fichier : `src/lib/collections.ts`. Sur GitHub, ouvrez-le,
-cliquez sur le crayon ✎, modifiez, puis « Commit changes ». Le site se met à jour en 1 à 2 minutes.
+Chaque langue a son fichier dans le dossier `src/collections` : `fr.ts` (français), `en.ts`
+(anglais), `es.ts` (espagnol), `pt.ts` (portugais du Brésil, avec les saisons de
+l'hémisphère sud). Sur GitHub, ouvrez le fichier, cliquez sur le crayon ✎, modifiez, puis
+« Commit changes ». Le site se met à jour en 1 à 2 minutes.
 
 - **Ajouter un livre à une sélection** : copiez une ligne `{ title: "…", author: "…" },`
-  dans la bonne sélection et changez le titre et l'auteur. La couverture est trouvée toute seule.
+  dans la bonne sélection et changez le titre et l'auteur. Écrivez le titre tel qu'il est
+  publié dans cette langue : la couverture de cette édition est trouvée toute seule.
 - **Changer les dates d'une saison** : `season: { from: "12-01", to: "12-31" }` (mois-jour).
 - **Créer une nouvelle sélection** : copiez un bloc entier `{ id: …, … },`, donnez-lui un
-  `id` unique (sans espace ni accent), un titre, des dates et des couleurs.
-- **Dernières sorties** : si la liste `NEW_RELEASES` est vide, Codex va chercher tout seul les
-  romans en français parus récemment. Pour choisir vous-même, écrivez-y les livres voulus.
+  `id` unique (sans espace ni accent), un titre, des dates et des couleurs (`THEMES.noel`,
+  `THEMES.plage`… : voir `src/collections/themes.ts`).
+- **Dernières sorties** : si la liste `newReleases` (en bas du fichier) est vide, Codex va
+  chercher tout seul les romans parus récemment dans cette langue. Pour choisir vous-même,
+  écrivez-y les livres voulus.
 
 Les couvertures d'une sélection sont gardées une semaine en mémoire, les nouveautés une journée :
 une modification peut donc mettre jusqu'à ce délai pour apparaître (ou tout de suite après un
 nouveau déploiement).
+
+### Modifier un texte du site
+
+Tous les textes sont dans `src/i18n/dictionaries` : `fr.ts`, `en.ts`, `es.ts`, `pt.ts`.
+Cherchez la phrase, changez-la entre les guillemets, « Commit changes ».
 
 ## Pour les développeurs
 
@@ -283,23 +320,26 @@ npm run dev                  # http://localhost:3000
 | `src/app/api/recherche/route.ts`        | `GET /api/recherche?titre=…` appelé par la page de recherche |
 | `src/components/LibraryProvider.tsx`    | session anonyme Supabase + lecture/écriture de la bibliothèque |
 | `src/components/BookDialog.tsx`         | fenêtre d'ajout / modification (note, avis)                 |
-| `src/app/bibliotheque/page.tsx`         | page « Ma bibliothèque »                                    |
+| `src/proxy.ts`                          | choix de la langue (adresse, cookie, réglage du navigateur)  |
+| `src/i18n/`                             | langues, textes traduits (`dictionaries/`), mise en forme    |
+| `src/app/[lang]/…`                      | toutes les pages, une version par langue                     |
+| `src/app/[lang]/bibliotheque/page.tsx`         | page « Ma bibliothèque »                                    |
 | `src/app/globals.css`                   | tout le style (couleurs en haut du fichier)                 |
 | `supabase/01-bibliotheque.sql`          | table `library_entries` et règles de sécurité (RLS)         |
 | `supabase/02-comptes.sql`               | table `profiles` (pseudos)                                  |
-| `src/app/compte/page.tsx`               | création de compte, connexion, déconnexion                  |
+| `src/app/[lang]/compte/page.tsx`               | création de compte, connexion, déconnexion                  |
 | `supabase/03-top.sql`                   | colonne `top_position` et fonction `set_top`                |
-| `src/app/top/page.tsx`                  | page « Mon top » (lecture et modification)                  |
+| `src/app/[lang]/top/page.tsx`                  | page « Mon top » (lecture et modification)                  |
 | `supabase/04-social.sql`                | lecture publique des bibliothèques, table `follows`         |
 | `src/lib/social.ts`                     | profils publics, abonnements, fil d'activité                |
-| `src/app/u/[pseudo]/page.tsx`           | profil public d'un lecteur                                  |
-| `src/app/lecteurs/page.tsx`             | recherche de lecteurs, abonnements, activité                |
+| `src/app/[lang]/u/[pseudo]/page.tsx`           | profil public d'un lecteur                                  |
+| `src/app/[lang]/lecteurs/page.tsx`             | recherche de lecteurs, abonnements, activité                |
 | `supabase/05-photos-et-accueil.sql`     | photos (Storage), vue `book_stats`                          |
-| `src/app/page.tsx`                      | page d'accueil                                              |
-| `src/app/recherche/page.tsx`            | recherche de livres (`/recherche?q=…`)                      |
-| `src/app/api/classiques/route.ts`       | grands classiques (liste dans `src/lib/classics.ts`)        |
+| `src/app/[lang]/page.tsx`                      | page d'accueil                                              |
+| `src/app/[lang]/recherche/page.tsx`            | recherche de livres (`/recherche?q=…`)                      |
+| `src/app/api/liste/route.ts`            | livres d'une sélection (listes dans `src/collections/`)    |
 | `src/lib/site.ts`                       | nom du site, slogan, présentation, adresse de contact      |
-| `src/app/mentions-legales/page.tsx`     | mentions légales                                            |
+| `src/app/[lang]/mentions-legales/page.tsx`     | mentions légales                                            |
 | `supabase/06-a-lire-dates-jaime.sql`    | statut lu / à lire, date de lecture, table `review_likes`   |
-| `src/app/a-lire/page.tsx`               | liste « À lire »                                            |
+| `src/app/[lang]/a-lire/page.tsx`               | liste « À lire »                                            |
 | `src/lib/avatar.ts`                     | recadrage/réduction des photos avant envoi                  |
