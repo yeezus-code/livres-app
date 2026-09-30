@@ -1,5 +1,5 @@
 -- =============================================================================
--- Base de données de l'application Livres
+-- Étape 1 : la bibliothèque
 -- À copier-coller en entier dans Supabase > SQL Editor, puis cliquer « Run ».
 -- =============================================================================
 

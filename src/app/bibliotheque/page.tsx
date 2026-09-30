@@ -12,7 +12,7 @@ import { Stars } from "@/components/StarRating";
 type Sort = "recent" | "rating" | "title";
 
 export default function LibraryPage() {
-  const { status, entries } = useLibrary();
+  const { status, entries, account } = useLibrary();
   const [sort, setSort] = useState<Sort>("recent");
   const [selected, setSelected] = useState<Book | null>(null);
 
@@ -42,6 +42,14 @@ export default function LibraryPage() {
           </label>
         )}
       </div>
+
+      {account?.isAnonymous && entries.length > 0 && (
+        <p className="banner">
+          Sans compte, cette bibliothèque n&apos;existe que sur cet appareil.{" "}
+          <Link href="/compte">Créez un compte</Link> pour la retrouver partout : vos livres
+          seront conservés.
+        </p>
+      )}
 
       {entries.length === 0 ? (
         <div className="empty">

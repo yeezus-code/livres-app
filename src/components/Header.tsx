@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLibrary } from "./LibraryProvider";
 
-const LINKS = [
-  { href: "/", label: "Rechercher" },
-  { href: "/bibliotheque", label: "Ma bibliothèque" },
-];
-
 export function Header() {
   const pathname = usePathname();
+  const { account } = useLibrary();
+  const links = [
+    { href: "/", label: "Recherche" },
+    { href: "/bibliotheque", label: "Bibliothèque" },
+    { href: "/compte", label: account?.username ? `@${account.username}` : "Compte" },
+  ];
   return (
     <header className="header">
       <div className="header__inner">
@@ -18,7 +19,7 @@ export function Header() {
           Livres
         </Link>
         <nav className="nav">
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -53,8 +54,8 @@ export function StatusBanner() {
   }
   return (
     <p className="banner banner--error">
-      Impossible d&apos;ouvrir votre bibliothèque. Vérifiez que les connexions anonymes sont
-      activées dans Supabase (README, étape 2).
+      Impossible d&apos;ouvrir votre bibliothèque. Vérifiez les réglages Supabase : connexions
+      anonymes activées (README, étape 2) et fichier 02-comptes.sql lancé (étape 5).
       {errorMessage && <span className="small"> Détail : {errorMessage}</span>}
     </p>
   );

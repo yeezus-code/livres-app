@@ -2,14 +2,16 @@
 
 Une application web pour noter ses lectures, dans l'esprit de Letterboxd.
 
-**Étape 1 (ce qui existe aujourd'hui)**
+**Ce qui existe aujourd'hui**
 
 - Recherche d'un livre par son titre : couverture, auteur(s), année et genre sont récupérés
   automatiquement sur **Open Library**, complétés par **Google Books** quand il manque quelque chose.
 - Bibliothèque personnelle : ajouter un livre, lui donner une note sur 5 et écrire un avis,
   modifier ou retirer un livre, trier par date d'ajout, note ou titre.
+- Comptes (pseudo, e-mail, mot de passe) : on peut commencer sans compte, puis en créer un
+  sans perdre ses livres, et retrouver sa bibliothèque sur tous ses appareils.
 
-**À venir** : vrais comptes (e-mail), page « Mon top », profils publics, abonnements.
+**À venir** : page « Mon top », profils publics, abonnements.
 
 ---
 
@@ -36,7 +38,7 @@ Comptez environ 20 minutes.
    - Cliquez **Create new project**, puis attendez 1 à 2 minutes.
 3. Créez la table des livres :
    - Dans le menu de gauche, ouvrez **SQL Editor**.
-   - Ouvrez le fichier [`supabase/schema.sql`](supabase/schema.sql) de ce dépôt sur GitHub,
+   - Ouvrez le fichier [`supabase/01-bibliotheque.sql`](supabase/01-bibliotheque.sql) de ce dépôt sur GitHub,
      copiez **tout** son contenu et collez-le dans l'éditeur.
    - Cliquez **Run**. Le message « Success. No rows returned » signifie que c'est bon.
 
@@ -102,9 +104,25 @@ dans tous les cas, donc la recherche fonctionne quand même. Pour lever la limit
 Un bandeau en haut de page vous prévient si Supabase n'est pas branché ou si les connexions
 anonymes ne sont pas activées.
 
-> Pour l'instant, la bibliothèque est liée au navigateur : sur un autre appareil, ou après
-> avoir effacé les données du site, elle apparaît vide. Les comptes (étape suivante)
-> régleront cela, et la bibliothèque déjà créée pourra être rattachée au compte.
+### Étape 5 — Activer les comptes
+
+1. Dans Supabase → **SQL Editor** → **New query** : copiez tout le contenu de
+   [`supabase/02-comptes.sql`](supabase/02-comptes.sql), collez-le, cliquez **Run**.
+2. Dans Supabase → **Authentication** → **Sign In / Providers** → **Email** :
+   - vérifiez que **Enable Email provider** est activé ;
+   - **désactivez « Confirm email »**, puis **Save**.
+
+   Pourquoi ? Le service d'e-mails gratuit de Supabase n'envoie que quelques e-mails par
+   heure, ce qui bloquerait les inscriptions. Contrepartie : l'adresse saisie n'est pas
+   vérifiée, et « mot de passe oublié » n'existe pas encore (on l'ajoutera avec un vrai
+   service d'e-mails).
+
+Test : dans l'application, ouvrez **Compte**, créez un compte. Votre pseudo apparaît en haut
+à droite, vos livres sont toujours là. Sur votre téléphone, **Compte** → **Se connecter** :
+vous retrouvez la même bibliothèque.
+
+> Sans compte, la bibliothèque est liée au navigateur. En se connectant sur un appareil où
+> des livres avaient été ajoutés sans compte, ces livres sont copiés dans le compte.
 
 ---
 
@@ -125,4 +143,6 @@ npm run dev                  # http://localhost:3000
 | `src/app/page.tsx`                      | page de recherche                                           |
 | `src/app/bibliotheque/page.tsx`         | page « Ma bibliothèque »                                    |
 | `src/app/globals.css`                   | tout le style (couleurs en haut du fichier)                 |
-| `supabase/schema.sql`                   | table `library_entries` et règles de sécurité (RLS)         |
+| `supabase/01-bibliotheque.sql`          | table `library_entries` et règles de sécurité (RLS)         |
+| `supabase/02-comptes.sql`               | table `profiles` (pseudos)                                  |
+| `src/app/compte/page.tsx`               | création de compte, connexion, déconnexion                  |
