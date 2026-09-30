@@ -111,6 +111,7 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 10;
+  padding-top: env(safe-area-inset-top); /* appli installée sur iPhone : sous la barre d'état */
   background: var(--ink);
   border-bottom: 1px solid rgb(236 194 103 / 0.25); /* filet doré */
 }
@@ -1520,3 +1521,91 @@ p.with-avatar { display: flex; }
 
 /* La recherche du bandeau reste claire, même en mode sombre */
 .hero__search input { background: #fffdf8; color: #1f2a28; }
+
+/* ==========================================================================
+   Installation de l'appli
+   ========================================================================== */
+.install {
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 30rem;
+  margin: 0 auto;
+  padding: 0.75rem 0.9rem;
+  background: var(--ink);
+  color: var(--on-ink);
+  border: 1px solid rgb(236 194 103 / 0.35);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
+  animation: install-in 0.35s ease-out both;
+}
+
+@media (max-width: 600px) {
+  /* au-dessus de la barre d'onglets du bas */
+  .install { bottom: calc(4.8rem + env(safe-area-inset-bottom)); }
+}
+
+@keyframes install-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.install__icon { width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0; }
+
+.install__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+  color: var(--on-ink-muted);
+}
+
+.install__text strong { color: var(--on-ink); font-size: 0.95rem; }
+.install__text b { color: var(--on-ink); font-weight: 600; }
+.install__text a { color: var(--gold-light); }
+
+.install__btn { min-height: 38px; padding-inline: 1rem; background: var(--gold-light); color: var(--ink); }
+.install__btn:hover:not(:disabled) { background: #f3d48a; }
+
+.install__close {
+  align-self: flex-start;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--on-ink-muted);
+  cursor: pointer;
+}
+
+.share-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  color: #2f7de1; /* le bleu du bouton Partager de Safari */
+}
+
+.install__text .share-icon { color: #7fb4ff; }
+
+.install-steps {
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.install-steps h2 { margin-top: 0.25rem; }
+.install-steps ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+.install-steps li { margin: 0.4rem 0; }
+
+/* Sur iPhone, les instructions iPhone passent en premier (déjà le cas dans la page) */
+.install-steps--first { border-color: var(--teal-100); }

@@ -307,6 +307,8 @@ function Profile() {
         </p>
         <p>
           <Link href={profileHref(account!.username!)}>Voir mon profil public</Link>
+          {" · "}
+          <Link href="/installer">Installer l&apos;appli sur mon téléphone</Link>
         </p>
         <ChangePassword />
         {error && <p className="error">{error}</p>}
