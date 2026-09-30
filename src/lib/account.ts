@@ -8,7 +8,12 @@ export type Account = {
   username: string | null;
   /** Adresse de la photo de profil, null s'il n'y en a pas */
   avatarUrl: string | null;
+  /** Adresse e-mail en attente de confirmation (inscription pas encore validée) */
+  pendingEmail: string | null;
 };
+
+/** Page où arrivent les liens envoyés par e-mail (confirmation, mot de passe oublié). */
+export const EMAIL_LINK_PATH = "/compte/lien";
 
 export type SignUpInput = { username: string; email: string; password: string };
 export type SignInInput = { email: string; password: string };
@@ -48,7 +53,13 @@ export function toFrenchMessage(error: unknown): string {
     case "validation_failed":
       return "Cette adresse e-mail n'est pas valide.";
     case "email_not_confirmed":
-      return "E-mail pas encore confirmé. Désactivez « Confirm email » dans Supabase (README).";
+      return "Adresse pas encore confirmée : cliquez sur le lien reçu par e-mail.";
+    case "same_password":
+      return "Le nouveau mot de passe doit être différent de l'ancien.";
+    case "reauthentication_needed":
+      return "Par sécurité, reconnectez-vous avant de changer de mot de passe.";
+    case "otp_expired":
+      return "Ce lien a expiré ou a déjà été utilisé. Demandez-en un nouveau.";
     case "over_request_rate_limit":
     case "over_email_send_rate_limit":
       return "Trop de tentatives. Patientez quelques minutes puis réessayez.";

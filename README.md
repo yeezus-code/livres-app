@@ -123,9 +123,8 @@ anonymes ne sont pas activées.
    - **désactivez « Confirm email »**, puis **Save**.
 
    Pourquoi ? Le service d'e-mails gratuit de Supabase n'envoie que quelques e-mails par
-   heure, ce qui bloquerait les inscriptions. Contrepartie : l'adresse saisie n'est pas
-   vérifiée, et « mot de passe oublié » n'existe pas encore (on l'ajoutera avec un vrai
-   service d'e-mails).
+   heure, ce qui bloquerait les inscriptions. On le réactive à l'étape 9, une fois un vrai
+   service d'e-mails branché.
 
 Test : dans l'application, ouvrez **Compte**, créez un compte. Votre pseudo apparaît en haut
 à droite, vos livres sont toujours là. Sur votre téléphone, **Compte** → **Se connecter** :
@@ -160,6 +159,63 @@ Test : onglet **Moi** → **Ajouter une photo**. Page d'accueil : les sections �
 « plus lus » et « derniers avis » se remplissent au fil des notes des lecteurs.
 
 Pour changer la liste des grands classiques : fichier [`src/lib/classics.ts`](src/lib/classics.ts).
+
+### Étape 9 — Brancher un vrai service d'e-mails
+
+Sans cela, Supabase n'envoie que 2 ou 3 e-mails par heure : impossible de proposer
+« mot de passe oublié » ou de vérifier les adresses. Choisissez **une** des deux options.
+
+**Option A — Gratuite, sans nom de domaine : Brevo** (300 e-mails par jour)
+
+1. Créez un compte sur <https://www.brevo.com>.
+2. Menu **Senders, Domains & Dedicated IPs** → **Senders** → **Add a sender** : saisissez
+   votre propre adresse (ex. votre Gmail) et validez-la avec l'e-mail que Brevo vous envoie.
+3. Menu **SMTP & API** → onglet **SMTP** → **Generate a new SMTP key**. Notez la clé,
+   ainsi que le **Login** affiché sur cette page.
+4. Dans Supabase → **Authentication** → **Emails** → onglet **SMTP Settings** → activez
+   **Enable custom SMTP** et remplissez :
+   - *Sender email* : l'adresse validée à l'étape 2 — *Sender name* : `Livres`
+   - *Host* : `smtp-relay.brevo.com` — *Port* : `587`
+   - *Username* : le Login de l'étape 3 — *Password* : la clé SMTP de l'étape 3
+   - **Save changes**.
+
+   Limite : envoyés « au nom » d'une adresse Gmail, certains e-mails peuvent arriver dans
+   les indésirables.
+
+**Option B — Plus fiable, environ 10 € par an : nom de domaine + Resend** (3 000 e-mails par mois)
+
+1. Dans Vercel → **Domains** → **Buy** : achetez un nom (ex. `mes-livres.fr`) puis, dans
+   votre projet → **Settings** → **Domains**, ajoutez-le : le site devient accessible à
+   cette adresse.
+2. Créez un compte sur <https://resend.com> → **Domains** → **Add Domain** → votre domaine.
+   Resend affiche 3 ou 4 lignes « DNS » : recopiez-les dans Vercel → **Domains** → votre
+   domaine → **DNS Records** → **Add**, puis cliquez **Verify** dans Resend.
+3. Resend → **API Keys** → **Create API Key**, copiez la clé.
+4. Dans Supabase → **Authentication** → **Emails** → **SMTP Settings** → **Enable custom SMTP** :
+   - *Sender email* : `bonjour@votre-domaine` — *Sender name* : `Livres`
+   - *Host* : `smtp.resend.com` — *Port* : `465`
+   - *Username* : `resend` — *Password* : la clé API
+   - **Save changes**.
+
+**Ensuite, dans les deux cas :**
+
+1. Supabase → **Authentication** → **URL Configuration** :
+   - *Site URL* : l'adresse de votre site (ex. `https://livres-app.vercel.app`, sans `/` à la fin)
+   - *Redirect URLs* → **Add URL** : la même adresse suivie de `/**`
+     (ex. `https://livres-app.vercel.app/**`).
+2. Supabase → **Authentication** → **Emails** → onglet **Templates** :
+   - **Change Email Address** : sujet `Confirmez votre adresse — Livres`, et remplacez tout le
+     contenu par celui de [`supabase/emails/confirmer-adresse.html`](supabase/emails/confirmer-adresse.html).
+   - **Reset Password** : sujet `Nouveau mot de passe — Livres`, contenu de
+     [`supabase/emails/mot-de-passe-oublie.html`](supabase/emails/mot-de-passe-oublie.html).
+   - **Save** après chaque modèle.
+3. Supabase → **Authentication** → **Rate Limits** : passez *Rate limit for sending emails*
+   à `30` par heure, **Save**.
+4. Supabase → **Authentication** → **Sign In / Providers** → **Email** : **réactivez
+   « Confirm email »**, **Save**. Les nouvelles inscriptions devront cliquer sur le lien reçu.
+
+Test : dans une fenêtre de navigation privée, créez un compte avec une vraie adresse →
+l'e-mail arrive → le lien active le compte. Puis **Se connecter** → **Mot de passe oublié ?**
 
 > Sans compte, la bibliothèque est liée au navigateur. En se connectant sur un appareil où
 > des livres avaient été ajoutés sans compte, ces livres sont copiés dans le compte.

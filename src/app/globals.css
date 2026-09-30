@@ -1061,3 +1061,27 @@ textarea {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ==========================================================================
+   Compte : messages et petits formulaires
+   ========================================================================== */
+.success { color: var(--teal-700); font-weight: 600; }
+
+.text-btn {
+  background: none;
+  border: 0;
+  padding: 0.25rem 0;
+  color: var(--teal-700);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.card__title { font-size: 1.15rem; margin: 0 0 0.5rem; }
+
+.subform {
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}

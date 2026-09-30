@@ -1,0 +1,24 @@
+<!--
+  Modèle « Change Email Address » de Supabase (Authentication > Emails > Templates).
+  Sujet à mettre : Confirmez votre adresse — Livres
+  C'est cet e-mail qui est envoyé à l'inscription (la session sans compte reçoit une adresse).
+-->
+<div style="font-family: Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; color: #16302f;">
+  <h1 style="color: #0f6b6b; font-size: 26px; margin-bottom: 8px;">Livres</h1>
+  <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
+    Bonjour,
+  </p>
+  <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
+    Pour activer votre compte, confirmez votre adresse e-mail en cliquant sur le bouton
+    ci-dessous.
+  </p>
+  <p style="margin: 28px 0;">
+    <a href="{{ .SiteURL }}/compte/lien?token_hash={{ .TokenHash }}&type=email_change"
+       style="background: #0f6b6b; color: #ffffff; padding: 14px 24px; border-radius: 10px; text-decoration: none; font-family: Arial, sans-serif; font-weight: bold; font-size: 16px;">
+      Confirmer mon adresse
+    </a>
+  </p>
+  <p style="font-family: Arial, sans-serif; font-size: 13px; color: #5b7371; line-height: 1.5;">
+    Vous n'êtes pas à l'origine de cette inscription ? Ignorez simplement cet e-mail.
+  </p>
+</div>

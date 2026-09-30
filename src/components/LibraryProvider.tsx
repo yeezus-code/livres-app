@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Book } from "@/lib/books";
 import {
   AccountError,
+  EMAIL_LINK_PATH,
   normalizeUsername,
   USERNAME_PATTERN,
   type Account,
@@ -37,6 +38,13 @@ type LibraryContextValue = {
   chooseUsername: (username: string) => Promise<void>;
   /** Change la photo de profil (null = la retirer) */
   setAvatar: (image: Blob | null) => Promise<void>;
+  /** Envoie l'e-mail « mot de passe oublié » */
+  sendPasswordReset: (email: string) => Promise<void>;
+  /** Renvoie l'e-mail de confirmation de l'inscription */
+  resendConfirmation: () => Promise<void>;
+  changePassword: (password: string) => Promise<void>;
+  /** Relit le compte et la bibliothèque (après un clic sur un lien reçu par e-mail) */
+  reload: () => Promise<void>;
 };
 
 const LibraryContext = createContext<LibraryContextValue | null>(null);
@@ -78,6 +86,16 @@ async function loadEverything(supabase: SupabaseClient) {
     if (error) throw error;
     username = profile?.username ?? null;
     avatarUrl = profile?.avatar_url ?? null;
+
+    // Compte tout juste confirmé par e-mail : on crée le profil avec le pseudo
+    // choisi à l'inscription (mis de côté en attendant la confirmation).
+    const pending = user.user_metadata?.pending_username as string | undefined;
+    if (!profile && pending) {
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({ id: user.id, username: pending });
+      if (!insertError) username = pending; // sinon (pseudo pris) : la page Compte en redemande un
+    }
   }
 
   const { data: entries, error } = await supabase
@@ -93,6 +111,7 @@ async function loadEverything(supabase: SupabaseClient) {
     isAnonymous: Boolean(user.is_anonymous),
     username,
     avatarUrl,
+    pendingEmail: user.is_anonymous ? (user.new_email ?? null) : null,
   };
   return { account, entries: entries as LibraryEntry[] };
 }
@@ -142,6 +161,9 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isSupabaseConfigured) return; // état « unconfigured » dès le départ
+    // Sur la page des liens reçus par e-mail, c'est cette page qui ouvre la session
+    // (sinon une session anonyme risquerait de prendre la place de la bonne).
+    if (window.location.pathname === EMAIL_LINK_PATH) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- chargement initial depuis Supabase
     reload();
   }, [reload]);
@@ -201,13 +223,17 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
       // La session anonyme reçoit un e-mail et un mot de passe : c'est le même
       // utilisateur, donc sa bibliothèque est conservée telle quelle.
-      const { data, error } = await supabase.auth.updateUser({ email: email.trim(), password });
+      // Le pseudo est mis de côté dans le compte, au cas où l'adresse doive d'abord être confirmée.
+      const { data, error } = await supabase.auth.updateUser(
+        { email: email.trim(), password, data: { pending_username: cleanName } },
+        { emailRedirectTo: window.location.origin + EMAIL_LINK_PATH },
+      );
       if (error) throw error;
       if (data.user.is_anonymous) {
-        // Supabase attend une confirmation par e-mail au lieu de créer le compte tout de suite
-        throw new AccountError(
-          "Supabase demande de confirmer l'e-mail : désactivez « Confirm email » (README, étape 5).",
-        );
+        // Confirmation par e-mail activée : le compte sera créé au clic sur le lien.
+        // La page Compte affiche « vérifiez votre boîte mail ».
+        await reload();
+        return;
       }
       // Nouveau « badge » de session, qui ne dit plus « anonyme »
       const { error: refreshError } = await supabase.auth.refreshSession();
@@ -293,12 +319,36 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     [account],
   );
 
+  const sendPasswordReset = useCallback(async (email: string) => {
+    const { error } = await requireSupabase().auth.resetPasswordForEmail(email.trim(), {
+      // « next=recovery » : utile seulement avec le modèle d'e-mail d'origine de Supabase
+      redirectTo: `${window.location.origin}${EMAIL_LINK_PATH}?next=recovery`,
+    });
+    if (error) throw error;
+  }, []);
+
+  const resendConfirmation = useCallback(async () => {
+    if (!account?.pendingEmail) return;
+    const { error } = await requireSupabase().auth.resend({
+      type: "email_change",
+      email: account.pendingEmail,
+    });
+    if (error) throw error;
+  }, [account]);
+
+  const changePassword = useCallback(async (password: string) => {
+    const { error } = await requireSupabase().auth.updateUser({ password });
+    if (error) throw error;
+  }, []);
+
   const value = useMemo(
     () => ({
       status, errorMessage, account, entries, findEntry, save, remove, setTop,
       signUp, signIn, signOut, chooseUsername, setAvatar,
+      sendPasswordReset, resendConfirmation, changePassword, reload,
     }),
-    [status, errorMessage, account, entries, findEntry, save, remove, setTop, signUp, signIn, signOut, chooseUsername, setAvatar],
+    [status, errorMessage, account, entries, findEntry, save, remove, setTop, signUp, signIn, signOut, chooseUsername, setAvatar,
+      sendPasswordReset, resendConfirmation, changePassword, reload],
   );
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;
