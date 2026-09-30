@@ -6,6 +6,8 @@ export type Account = {
   isAnonymous: boolean;
   /** null si la personne n'a pas (encore) choisi de pseudo */
   username: string | null;
+  /** Adresse de la photo de profil, null s'il n'y en a pas */
+  avatarUrl: string | null;
 };
 
 export type SignUpInput = { username: string; email: string; password: string };
@@ -30,6 +32,9 @@ export class AccountError extends Error {}
 /** Traduit les erreurs de Supabase en messages compréhensibles. */
 export function toFrenchMessage(error: unknown): string {
   if (error instanceof AccountError) return error.message;
+  if ((error as Error)?.message?.includes("Bucket not found")) {
+    return "Le stockage des photos n'existe pas encore : lancez 05-photos-et-accueil.sql (README).";
+  }
   const code = (error as { code?: string })?.code;
   switch (code) {
     case "email_exists":

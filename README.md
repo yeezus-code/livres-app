@@ -17,6 +17,10 @@ Une application web pour noter ses lectures, dans l'esprit de Letterboxd.
 - Profils publics (`/u/pseudo`) : bibliothèque, notes, avis et top de chaque lecteur.
 - Page « Lecteurs » : trouver des lecteurs par pseudo, s'abonner, suivre leur activité.
 
+- Photo de profil (importée depuis son appareil, recadrée et réduite automatiquement).
+- Page d'accueil : grands classiques, livres les mieux notés et les plus lus par les
+  lecteurs, derniers avis.
+
 Les bibliothèques des comptes sont publiques ; celles des visiteurs sans compte restent privées.
 
 ---
@@ -145,6 +149,18 @@ quelqu'un : il voit vos livres, vos notes, vos avis et votre top. Onglet **Lecte
 cherchez un pseudo, ouvrez son profil, **S'abonner** ; ses lectures apparaissent dans
 « Activité ».
 
+### Étape 8 — Activer les photos de profil et la page d'accueil
+
+Dans Supabase → **SQL Editor** → **New query** : copiez tout le contenu de
+[`supabase/05-photos-et-accueil.sql`](supabase/05-photos-et-accueil.sql), collez-le,
+cliquez **Run**. (Ce fichier crée aussi l'espace de stockage des photos : rien à faire
+dans le menu Storage.)
+
+Test : onglet **Moi** → **Ajouter une photo**. Page d'accueil : les sections « mieux notés »,
+« plus lus » et « derniers avis » se remplissent au fil des notes des lecteurs.
+
+Pour changer la liste des grands classiques : fichier [`src/lib/classics.ts`](src/lib/classics.ts).
+
 > Sans compte, la bibliothèque est liée au navigateur. En se connectant sur un appareil où
 > des livres avaient été ajoutés sans compte, ces livres sont copiés dans le compte.
 
@@ -164,7 +180,6 @@ npm run dev                  # http://localhost:3000
 | `src/app/api/recherche/route.ts`        | `GET /api/recherche?titre=…` appelé par la page de recherche |
 | `src/components/LibraryProvider.tsx`    | session anonyme Supabase + lecture/écriture de la bibliothèque |
 | `src/components/BookDialog.tsx`         | fenêtre d'ajout / modification (note, avis)                 |
-| `src/app/page.tsx`                      | page de recherche                                           |
 | `src/app/bibliotheque/page.tsx`         | page « Ma bibliothèque »                                    |
 | `src/app/globals.css`                   | tout le style (couleurs en haut du fichier)                 |
 | `supabase/01-bibliotheque.sql`          | table `library_entries` et règles de sécurité (RLS)         |
@@ -176,3 +191,8 @@ npm run dev                  # http://localhost:3000
 | `src/lib/social.ts`                     | profils publics, abonnements, fil d'activité                |
 | `src/app/u/[pseudo]/page.tsx`           | profil public d'un lecteur                                  |
 | `src/app/lecteurs/page.tsx`             | recherche de lecteurs, abonnements, activité                |
+| `supabase/05-photos-et-accueil.sql`     | photos (Storage), vue `book_stats`                          |
+| `src/app/page.tsx`                      | page d'accueil                                              |
+| `src/app/recherche/page.tsx`            | recherche de livres (`/recherche?q=…`)                      |
+| `src/app/api/classiques/route.ts`       | grands classiques (liste dans `src/lib/classics.ts`)        |
+| `src/lib/avatar.ts`                     | recadrage/réduction des photos avant envoi                  |

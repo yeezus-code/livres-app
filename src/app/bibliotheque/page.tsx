@@ -6,6 +6,7 @@ import type { Book } from "@/lib/books";
 import { entryToBook } from "@/lib/library";
 import { BookDialog } from "@/components/BookDialog";
 import { BookGrid } from "@/components/BookGrid";
+import { LibraryTabs } from "@/components/LibraryTabs";
 import { useLibrary } from "@/components/LibraryProvider";
 
 type Sort = "recent" | "rating" | "title";
@@ -26,6 +27,7 @@ export default function LibraryPage() {
 
   return (
     <>
+      <LibraryTabs />
       <div className="page-head">
         <h1 className="page-title">
           Ma bibliothèque <span className="muted count">{entries.length}</span>

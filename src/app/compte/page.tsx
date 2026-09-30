@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { prepareAvatar } from "@/lib/avatar";
+import { Avatar } from "@/components/Avatar";
 import { profileHref } from "@/lib/social";
 import { normalizeUsername, PASSWORD_MIN_LENGTH, toFrenchMessage } from "@/lib/account";
 import { useLibrary } from "@/components/LibraryProvider";
@@ -192,6 +194,7 @@ function Profile() {
     <div className="narrow">
       <h1 className="page-title">Mon compte</h1>
       <div className="card">
+        <AvatarEditor />
         <p className="profile__name">@{account!.username}</p>
         <p className="muted">{account!.email}</p>
         <p>
@@ -210,6 +213,50 @@ function Profile() {
           Se déconnecter
         </button>
       </div>
+    </div>
+  );
+}
+
+function AvatarEditor() {
+  const { account, setAvatar } = useLibrary();
+  const { busy, error, submit } = useSubmit();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className="avatar-editor">
+      <Avatar url={account!.avatarUrl} username={account!.username!} size={88} />
+      <div className="avatar-editor__actions">
+        <button
+          type="button"
+          className="btn btn--ghost"
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+        >
+          {busy ? "Envoi…" : account!.avatarUrl ? "Changer la photo" : "Ajouter une photo"}
+        </button>
+        {account!.avatarUrl && (
+          <button
+            type="button"
+            className="link-btn"
+            disabled={busy}
+            onClick={() => submit(() => setAvatar(null))}
+          >
+            Retirer la photo
+          </button>
+        )}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = ""; // permet de rechoisir le même fichier
+          if (file) submit(async () => setAvatar(await prepareAvatar(file)));
+        }}
+      />
+      {error && <p className="error small">{error}</p>}
     </div>
   );
 }

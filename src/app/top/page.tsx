@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { TOP_SIZE, type LibraryEntry } from "@/lib/library";
 import { BookCover } from "@/components/BookCover";
+import { LibraryTabs } from "@/components/LibraryTabs";
 import { useLibrary } from "@/components/LibraryProvider";
 import { Stars } from "@/components/StarRating";
 
@@ -40,6 +41,7 @@ export default function TopPage() {
   if (entries.length === 0) {
     return (
       <>
+        <LibraryTabs />
         <h1 className="page-title">Mon top</h1>
         <div className="empty">
           <p>Ajoutez d&apos;abord des livres à votre bibliothèque pour composer votre top.</p>
@@ -55,6 +57,7 @@ export default function TopPage() {
   if (draft === null) {
     return (
       <>
+        <LibraryTabs />
         <div className="page-head">
           <h1 className="page-title">Mon top</h1>
           {savedTop.length > 0 && (
@@ -130,6 +133,7 @@ export default function TopPage() {
 
   return (
     <>
+      <LibraryTabs />
       <h1 className="page-title">Modifier mon top</h1>
 
       {inTop.length === 0 ? (

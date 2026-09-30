@@ -35,6 +35,8 @@ type LibraryContextValue = {
   signOut: () => Promise<void>;
   /** Choisit le pseudo, si le compte n'en a pas encore */
   chooseUsername: (username: string) => Promise<void>;
+  /** Change la photo de profil (null = la retirer) */
+  setAvatar: (image: Blob | null) => Promise<void>;
 };
 
 const LibraryContext = createContext<LibraryContextValue | null>(null);
@@ -66,14 +68,16 @@ async function loadEverything(supabase: SupabaseClient) {
   const user = userData.user;
 
   let username: string | null = null;
+  let avatarUrl: string | null = null;
   if (!user.is_anonymous) {
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("username")
+      .select("username, avatar_url")
       .eq("id", user.id)
       .maybeSingle();
     if (error) throw error;
     username = profile?.username ?? null;
+    avatarUrl = profile?.avatar_url ?? null;
   }
 
   const { data: entries, error } = await supabase
@@ -88,6 +92,7 @@ async function loadEverything(supabase: SupabaseClient) {
     email: user.email ?? null,
     isAnonymous: Boolean(user.is_anonymous),
     username,
+    avatarUrl,
   };
   return { account, entries: entries as LibraryEntry[] };
 }
@@ -261,12 +266,39 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     [reload],
   );
 
+  const setAvatar = useCallback(
+    async (image: Blob | null) => {
+      const supabase = requireSupabase();
+      if (!account) return;
+      // Un seul fichier par compte, toujours au même endroit : avatars/<id>/avatar.jpg
+      const path = `${account.id}/avatar.jpg`;
+      let url: string | null = null;
+      if (image) {
+        const { error } = await supabase.storage
+          .from("avatars")
+          .upload(path, image, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
+        if (error) throw error;
+        // « ?v=… » force les navigateurs à afficher la nouvelle photo, pas l'ancienne en cache
+        url = `${supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl}?v=${Date.now()}`;
+      } else {
+        await supabase.storage.from("avatars").remove([path]);
+      }
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("id", account.id);
+      if (error) throw error;
+      setAccount({ ...account, avatarUrl: url });
+    },
+    [account],
+  );
+
   const value = useMemo(
     () => ({
       status, errorMessage, account, entries, findEntry, save, remove, setTop,
-      signUp, signIn, signOut, chooseUsername,
+      signUp, signIn, signOut, chooseUsername, setAvatar,
     }),
-    [status, errorMessage, account, entries, findEntry, save, remove, setTop, signUp, signIn, signOut, chooseUsername],
+    [status, errorMessage, account, entries, findEntry, save, remove, setTop, signUp, signIn, signOut, chooseUsername, setAvatar],
   );
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;

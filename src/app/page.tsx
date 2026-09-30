@@ -1,114 +1,205 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Book } from "@/lib/books";
+import {
+  fetchBestRated,
+  fetchPopular,
+  fetchRecentReviews,
+  statsToBook,
+  type BookStats,
+  type Review,
+} from "@/lib/home";
+import { timeAgo } from "@/lib/social";
+import { getSupabase } from "@/lib/supabase";
+import { Avatar } from "@/components/Avatar";
 import { BookCover } from "@/components/BookCover";
 import { BookDialog } from "@/components/BookDialog";
+import { BookShelf } from "@/components/BookShelf";
+import { EntryDialog } from "@/components/EntryDialog";
 import { useLibrary } from "@/components/LibraryProvider";
 import { Stars } from "@/components/StarRating";
 
-type SearchState =
-  | { kind: "idle" }
-  | { kind: "loading" }
-  | { kind: "done"; books: Book[]; title: string }
-  | { kind: "error"; message: string };
+type Community = { best: BookStats[]; popular: BookStats[]; reviews: Review[] };
 
-export default function SearchPage() {
+export default function HomePage() {
+  const router = useRouter();
+  const { status, account, entries } = useLibrary();
   const [query, setQuery] = useState("");
-  const [state, setState] = useState<SearchState>({ kind: "idle" });
-  const [selected, setSelected] = useState<Book | null>(null);
-  const library = useLibrary();
+  const [classics, setClassics] = useState<Book[] | null>(null);
+  const [community, setCommunity] = useState<Community | null>(null);
+  const [toAdd, setToAdd] = useState<Book | null>(null);
+  const [review, setReview] = useState<Review | null>(null);
 
-  // La recherche part toute seule quand on arrête de taper pendant 0,4 s
+  // Les grands classiques (ne dépendent pas de Supabase)
   useEffect(() => {
-    const title = query.trim();
-    if (title.length < 2) return;
+    fetch("/api/classiques")
+      .then((res) => res.json())
+      .then((data) => setClassics(data.books ?? []))
+      .catch(() => setClassics([]));
+  }, []);
 
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      setState({ kind: "loading" });
-      try {
-        const res = await fetch(`/api/recherche?titre=${encodeURIComponent(title)}`, {
-          signal: controller.signal,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Erreur inconnue");
-        setState({ kind: "done", books: data.books, title });
-      } catch (e) {
-        if (controller.signal.aborted) return; // une nouvelle recherche a pris le relais
-        setState({ kind: "error", message: e instanceof Error ? e.message : String(e) });
-      }
-    }, 400);
+  // Ce qui vient des lecteurs de l'application
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase || status !== "ready") return;
+    Promise.all([fetchBestRated(supabase), fetchPopular(supabase), fetchRecentReviews(supabase)])
+      .then(([best, popular, reviews]) => setCommunity({ best, popular, reviews }))
+      .catch((e) => {
+        console.error(e); // ex. 05-photos-et-accueil.sql pas encore lancé
+        setCommunity({ best: [], popular: [], reviews: [] });
+      });
+  }, [status]);
 
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [query]);
-
-  const canAdd = library.status === "ready";
-  // Moins de deux lettres : on n'affiche pas d'anciens résultats
-  const view: SearchState = query.trim().length < 2 ? { kind: "idle" } : state;
+  const hasCommunity =
+    community && (community.best.length || community.popular.length || community.reviews.length);
 
   return (
     <>
-      <h1 className="page-title">Rechercher un livre</h1>
+      <section className="hero">
+        <h1 className="hero__title">
+          {account?.username ? `Bonjour @${account.username}` : "Vos lectures, vos notes, vos avis."}
+        </h1>
+        <p className="hero__text">
+          {entries.length > 0
+            ? `${entries.length} livre${entries.length > 1 ? "s" : ""} dans votre bibliothèque. Que lisez-vous en ce moment ?`
+            : "Retrouvez un livre, donnez-lui une note sur 5, gardez une trace de ce que vous en avez pensé."}
+        </p>
+        <form
+          className="hero__search"
+          role="search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (query.trim()) router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
+          }}
+        >
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher un livre par son titre"
+            aria-label="Titre du livre"
+            enterKeyHint="search"
+          />
+          <button type="submit" className="btn btn--primary">
+            Chercher
+          </button>
+        </form>
+      </section>
 
-      <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Titre du livre, ex. L'Étranger"
-          aria-label="Titre du livre"
-          autoFocus
-          enterKeyHint="search"
+      <section className="home-section">
+        <h2 className="section-title">Les grands classiques</h2>
+        <BookShelf
+          loading={classics === null}
+          items={(classics ?? []).map((book) => ({ book }))}
+          onSelect={setToAdd}
         />
-      </form>
+        {classics?.length === 0 && (
+          <p className="muted small">Les classiques sont momentanément indisponibles.</p>
+        )}
+      </section>
 
-      {view.kind === "idle" && (
-        <p className="muted center">Tapez au moins deux lettres du titre.</p>
-      )}
-      {view.kind === "loading" && <p className="muted center">Recherche…</p>}
-      {view.kind === "error" && <p className="error center">{view.message}</p>}
-      {view.kind === "done" && view.books.length === 0 && (
-        <p className="muted center">Aucun livre trouvé pour « {view.title} ».</p>
+      {community && community.best.length > 0 && (
+        <section className="home-section">
+          <h2 className="section-title">Les mieux notés par nos lecteurs</h2>
+          <BookShelf
+            items={community.best.map((s) => ({
+              book: statsToBook(s),
+              caption: (
+                <>
+                  <span className="star star--on">★</span> {formatAverage(s.average)}{" "}
+                  <span className="muted">
+                    ({s.ratings} note{s.ratings > 1 ? "s" : ""})
+                  </span>
+                </>
+              ),
+            }))}
+            onSelect={setToAdd}
+          />
+        </section>
       )}
 
-      {view.kind === "done" && view.books.length > 0 && (
-        <ul className="results">
-          {view.books.map((book) => {
-            const entry = library.findEntry(book.id);
-            return (
-              <li key={book.id} className="result">
-                <BookCover src={book.coverUrl} title={book.title} size="sm" />
-                <div className="result__info">
-                  <h2 className="result__title">{book.title}</h2>
-                  {book.authors.length > 0 && <p className="muted">{book.authors.join(", ")}</p>}
-                  <p className="small muted">
-                    {[book.year, ...book.genres].filter(Boolean).join(" · ")}
-                  </p>
-                  {entry && (
-                    <p className="small in-library">
-                      Dans ma bibliothèque <Stars value={entry.rating} />
-                    </p>
-                  )}
-                </div>
-                {canAdd && (
-                  <button
-                    className={entry ? "btn btn--ghost" : "btn btn--primary"}
-                    onClick={() => setSelected(book)}
-                  >
-                    {entry ? "Modifier" : "Ajouter"}
-                  </button>
-                )}
+      {community && community.popular.length > 0 && (
+        <section className="home-section">
+          <h2 className="section-title">Les plus lus</h2>
+          <BookShelf
+            items={community.popular.map((s) => ({
+              book: statsToBook(s),
+              caption: (
+                <span className="muted">
+                  {s.readers} lecteur{s.readers > 1 ? "s" : ""}
+                </span>
+              ),
+            }))}
+            onSelect={setToAdd}
+          />
+        </section>
+      )}
+
+      {community && community.reviews.length > 0 && (
+        <section className="home-section">
+          <h2 className="section-title">Derniers avis</h2>
+          <ul className="reviews">
+            {community.reviews.map((r) => (
+              <li key={r.entry.id}>
+                <button className="review-card" onClick={() => setReview(r)}>
+                  <BookCover src={r.entry.cover_url} title={r.entry.title} size="sm" />
+                  <span className="review-card__body">
+                    <span className="review-card__title">{r.entry.title}</span>
+                    <span className="small with-avatar">
+                      <Avatar url={r.author.avatar_url} username={r.author.username} size={20} />
+                      <strong>@{r.author.username}</strong>
+                      <Stars value={r.entry.rating} />
+                    </span>
+                    <span className="review-card__text">« {r.entry.review} »</span>
+                    <span className="small muted">{timeAgo(r.entry.updated_at)}</span>
+                  </span>
+                </button>
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ul>
+        </section>
       )}
 
-      <BookDialog book={selected} onClose={() => setSelected(null)} />
+      {community && !hasCommunity && (
+        <section className="home-section">
+          <p className="banner">
+            Ici apparaîtront les livres les mieux notés et les derniers avis des lecteurs.{" "}
+            {account?.username ? (
+              <>Notez vos lectures pour lancer le mouvement !</>
+            ) : (
+              <>
+                <Link href="/compte">Créez un compte</Link> et notez vos lectures pour lancer le
+                mouvement !
+              </>
+            )}
+          </p>
+        </section>
+      )}
+
+      {community && community.reviews.length > 0 && (
+        <p className="center">
+          <Link href="/lecteurs">Découvrir les lecteurs →</Link>
+        </p>
+      )}
+
+      <EntryDialog
+        entry={review?.entry ?? null}
+        author={review?.author ?? null}
+        onClose={() => setReview(null)}
+        onAdd={(book) => {
+          setReview(null);
+          setToAdd(book);
+        }}
+      />
+      <BookDialog book={toAdd} onClose={() => setToAdd(null)} />
     </>
   );
 }
+
+function formatAverage(value: number | null) {
+  return value === null ? "–" : Number(value).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+}
+

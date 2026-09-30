@@ -2,7 +2,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LibraryEntry } from "./library";
 
-export type Profile = { id: string; username: string };
+export type Profile = { id: string; username: string; avatar_url: string | null };
 
 export type PublicProfile = Profile & {
   entries: LibraryEntry[];
@@ -10,7 +10,7 @@ export type PublicProfile = Profile & {
   following: number;
 };
 
-export type ActivityItem = { entry: LibraryEntry; username: string };
+export type ActivityItem = { entry: LibraryEntry; author: Profile };
 
 /** Adresse de la page publique d'un lecteur. */
 export function profileHref(username: string) {
@@ -24,7 +24,7 @@ export async function fetchPublicProfile(
 ): Promise<PublicProfile | null> {
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("id, username")
+    .select("id, username, avatar_url")
     .eq("username", username.toLowerCase())
     .maybeSingle();
   if (error) throw error;
@@ -59,7 +59,7 @@ export async function fetchPublicProfile(
 export async function fetchFollowing(supabase: SupabaseClient, myId: string): Promise<Profile[]> {
   const { data, error } = await supabase
     .from("follows")
-    .select("followee:profiles!follows_followee_id_fkey(id, username)")
+    .select("followee:profiles!follows_followee_id_fkey(id, username, avatar_url)")
     .eq("follower_id", myId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -88,23 +88,23 @@ export async function fetchActivity(
   people: Profile[],
 ): Promise<ActivityItem[]> {
   if (!people.length) return [];
-  const names = new Map(people.map((p) => [p.id, p.username]));
+  const byId = new Map(people.map((p) => [p.id, p]));
   const { data, error } = await supabase
     .from("library_entries")
     .select("*")
-    .in("user_id", [...names.keys()])
+    .in("user_id", [...byId.keys()])
     .order("updated_at", { ascending: false })
     .limit(40);
   if (error) throw error;
   return (data as (LibraryEntry & { user_id: string })[]).map((entry) => ({
     entry,
-    username: names.get(entry.user_id)!,
+    author: byId.get(entry.user_id)!,
   }));
 }
 
 /** Recherche de lecteurs par pseudo ; sans texte, les derniers inscrits. */
 export async function searchReaders(supabase: SupabaseClient, query: string): Promise<Profile[]> {
-  let request = supabase.from("profiles").select("id, username");
+  let request = supabase.from("profiles").select("id, username, avatar_url");
   const clean = query.trim().toLowerCase();
   if (clean) {
     // « _ » et « % » ont un sens spécial dans ILIKE : on les neutralise

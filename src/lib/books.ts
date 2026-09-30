@@ -99,9 +99,10 @@ type OpenLibraryDoc = {
   subject?: string[];
 };
 
-async function searchOpenLibrary(title: string): Promise<Book[]> {
+async function searchOpenLibrary(title: string, author?: string): Promise<Book[]> {
   const url = new URL("https://openlibrary.org/search.json");
   url.searchParams.set("title", title);
+  if (author) url.searchParams.set("author", author);
   url.searchParams.set("fields", "key,title,author_name,first_publish_year,cover_i,subject");
   url.searchParams.set("limit", String(MAX_RESULTS));
   url.searchParams.set("lang", "fr"); // privilégie les titres des éditions françaises
@@ -145,9 +146,9 @@ function googleCover(links: GoogleVolume["volumeInfo"]["imageLinks"]): string | 
   return raw.replace(/^http:/, "https:").replace("&edge=curl", "");
 }
 
-async function searchGoogleBooks(title: string): Promise<Book[]> {
+async function searchGoogleBooks(title: string, author?: string): Promise<Book[]> {
   const url = new URL("https://www.googleapis.com/books/v1/volumes");
-  url.searchParams.set("q", `intitle:${title}`);
+  url.searchParams.set("q", `intitle:${title}` + (author ? ` inauthor:${author}` : ""));
   url.searchParams.set("maxResults", String(MAX_RESULTS));
   url.searchParams.set("printType", "books");
   const key = process.env.GOOGLE_BOOKS_API_KEY;
@@ -206,8 +207,11 @@ export function mergeResults(openLibrary: Book[], google: Book[]): Book[] {
     .map(({ book }) => book);
 }
 
-export async function searchBooks(title: string): Promise<Book[]> {
-  const [ol, gb] = await Promise.allSettled([searchOpenLibrary(title), searchGoogleBooks(title)]);
+export async function searchBooks(title: string, author?: string): Promise<Book[]> {
+  const [ol, gb] = await Promise.allSettled([
+    searchOpenLibrary(title, author),
+    searchGoogleBooks(title, author),
+  ]);
 
   if (ol.status === "rejected") console.error("Open Library :", ol.reason);
   if (gb.status === "rejected") console.error("Google Books :", gb.reason);

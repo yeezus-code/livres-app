@@ -7,6 +7,7 @@ import type { Book } from "@/lib/books";
 import type { LibraryEntry } from "@/lib/library";
 import { fetchPublicProfile, follow, unfollow, type PublicProfile } from "@/lib/social";
 import { getSupabase } from "@/lib/supabase";
+import { Avatar } from "@/components/Avatar";
 import { BookCover } from "@/components/BookCover";
 import { BookDialog } from "@/components/BookDialog";
 import { BookGrid } from "@/components/BookGrid";
@@ -71,7 +72,8 @@ export default function PublicProfilePage() {
   return (
     <>
       <section className="profile-head">
-        <div>
+        <Avatar url={profile.avatar_url} username={profile.username} size={72} />
+        <div className="profile-head__main">
           <h1 className="page-title profile-head__name">@{profile.username}</h1>
           <p className="muted small profile-head__stats">
             <span>
@@ -122,7 +124,7 @@ export default function PublicProfilePage() {
 
       <EntryDialog
         entry={selected}
-        username={profile.username}
+        author={profile}
         onClose={() => setSelected(null)}
         onAdd={(book) => {
           setSelected(null);

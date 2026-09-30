@@ -130,6 +130,8 @@ textarea {
 .nav__link:hover { color: #fff; }
 
 .nav__icon { display: none; width: 22px; height: 22px; fill: currentColor; }
+.nav__avatar { display: inline-flex; margin-right: 0.4rem; vertical-align: middle; }
+.nav__avatar .avatar { box-shadow: 0 0 0 1.5px rgb(255 255 255 / 0.7); }
 .nav__short { display: none; }
 
 /* Sur téléphone : le logo reste en haut, les onglets passent en barre en bas d'écran */
@@ -164,6 +166,7 @@ textarea {
   }
 
   .nav__icon { display: block; }
+  .nav__avatar { margin: 0; }
   .nav__label { display: none; }
   .nav__short { display: block; }
 
@@ -674,6 +677,8 @@ textarea {
   border-bottom: 1px solid var(--border);
 }
 
+.profile-head__main { flex: 1; min-width: 12rem; }
+
 .profile-head__name { margin-bottom: 0.25rem; overflow-wrap: anywhere; }
 
 .profile-head__stats {
@@ -705,6 +710,7 @@ textarea {
   gap: 0.75rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0.45rem;
 }
 
 .shelf li { scroll-snap-align: start; }
@@ -768,8 +774,10 @@ textarea {
 }
 
 .chip {
-  display: inline-block;
-  padding: 0.45rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.9rem 0.35rem 0.4rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -811,3 +819,245 @@ textarea {
 }
 
 .feed__title { font-weight: 600; overflow-wrap: anywhere; }
+
+/* ==========================================================================
+   Photos de profil
+   ========================================================================== */
+.avatar {
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  background: var(--teal-100);
+}
+
+.avatar--letter {
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--font);
+}
+
+.with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.avatar-editor {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avatar-editor__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.avatar-editor .error { flex-basis: 100%; margin: 0; }
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0.25rem 0;
+  color: var(--danger);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Onglets « Mes livres / Mon top » : ce sont des liens */
+.tabs--links { max-width: 320px; margin-bottom: 0.5rem; }
+.tabs--links .tab {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+.tabs--links .tab[aria-current="page"] {
+  background: var(--surface);
+  color: var(--teal-700);
+  box-shadow: var(--shadow);
+}
+
+/* ==========================================================================
+   Page d'accueil
+   ========================================================================== */
+.hero {
+  margin: -1rem -1rem 1.5rem; /* colle à l'en-tête, sur toute la largeur */
+  padding: 2rem 1rem 2.25rem;
+  background: linear-gradient(160deg, var(--teal-700), var(--teal-900));
+  color: #fff;
+  text-align: center;
+}
+
+@media (min-width: 961px) {
+  .hero { border-radius: 0 0 16px 16px; }
+}
+
+.hero__title {
+  font-size: clamp(1.6rem, 5vw, 2.3rem);
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.hero__text {
+  max-width: 34rem;
+  margin: 0 auto 1.25rem;
+  color: var(--teal-100);
+}
+
+.hero__search {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.hero__search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: var(--radius);
+  font-size: 1.05rem;
+}
+
+.hero__search .btn { background: var(--star); color: var(--teal-900); }
+.hero__search .btn:hover { background: #f0b73a; }
+
+.home-section { margin-bottom: 1.75rem; }
+.home-section .section-title { margin-top: 0; }
+
+/* Rangée de couvertures qui défile horizontalement */
+.rail {
+  list-style: none;
+  margin: 0 -1rem;
+  padding: 0.25rem 1rem 0.75rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 112px;
+  gap: 0.9rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 1rem; /* l'aimantation garde la marge de gauche */
+  scrollbar-width: thin;
+}
+
+@media (min-width: 700px) {
+  .rail { grid-auto-columns: 132px; }
+}
+
+.rail__item { scroll-snap-align: start; }
+
+.rail__button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rail__cover { position: relative; display: block; margin-bottom: 0.35rem; }
+.rail__button:hover .cover { transform: translateY(-2px); }
+.rail__button .cover { transition: transform 0.15s; }
+
+.rail__check {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--teal-700);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.rail__title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rail__author,
+.rail__caption { font-size: 0.8rem; color: var(--muted); }
+.rail__caption { color: var(--text); }
+
+.rail__placeholder {
+  background: linear-gradient(90deg, var(--teal-50), var(--teal-100), var(--teal-50));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  box-shadow: none;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail__placeholder { animation: none; }
+}
+
+/* Derniers avis */
+.reviews {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  gap: 0.75rem;
+}
+
+.review-card {
+  display: flex;
+  gap: 0.8rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem;
+  text-align: left;
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.review-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.review-card__title { font-weight: 600; overflow-wrap: anywhere; }
+
+.review-card__text {
+  font-style: italic;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

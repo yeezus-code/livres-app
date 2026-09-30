@@ -13,6 +13,7 @@ import {
   type Profile,
 } from "@/lib/social";
 import { getSupabase } from "@/lib/supabase";
+import { Avatar } from "@/components/Avatar";
 import { BookCover } from "@/components/BookCover";
 import { BookDialog } from "@/components/BookDialog";
 import { EntryDialog } from "@/components/EntryDialog";
@@ -80,7 +81,7 @@ export default function ReadersPage() {
             {following.map((p) => (
               <li key={p.id}>
                 <Link href={profileHref(p.username)} className="chip">
-                  @{p.username}
+                  <Avatar url={p.avatar_url} username={p.username} size={24} />@{p.username}
                 </Link>
               </li>
             ))}
@@ -104,8 +105,9 @@ export default function ReadersPage() {
                   <button className="feed__item" onClick={() => setSelected(item)}>
                     <BookCover src={item.entry.cover_url} title={item.entry.title} size="sm" />
                     <span className="feed__text">
-                      <span className="small">
-                        <strong>@{item.username}</strong>{" "}
+                      <span className="small with-avatar">
+                        <Avatar url={item.author.avatar_url} username={item.author.username} size={20} />
+                        <strong>@{item.author.username}</strong>{" "}
                         <span className="muted">· {timeAgo(item.entry.updated_at)}</span>
                       </span>
                       <span className="feed__title">{item.entry.title}</span>
@@ -143,7 +145,7 @@ export default function ReadersPage() {
               {readers.map((p) => (
                 <li key={p.id}>
                   <Link href={profileHref(p.username)} className="chip">
-                    @{p.username}
+                    <Avatar url={p.avatar_url} username={p.username} size={24} />@{p.username}
                   </Link>
                 </li>
               ))}
@@ -154,7 +156,7 @@ export default function ReadersPage() {
 
       <EntryDialog
         entry={selected?.entry ?? null}
-        username={selected?.username ?? ""}
+        author={selected?.author ?? null}
         onClose={() => setSelected(null)}
         onAdd={(book) => {
           setSelected(null);

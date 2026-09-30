@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { entryToBook, type LibraryEntry } from "@/lib/library";
 import type { Book } from "@/lib/books";
-import { profileHref } from "@/lib/social";
+import { profileHref, type Profile } from "@/lib/social";
+import { Avatar } from "./Avatar";
 import { BookCover } from "./BookCover";
 import { useLibrary } from "./LibraryProvider";
 import { Stars } from "./StarRating";
@@ -15,12 +16,12 @@ import { Stars } from "./StarRating";
  */
 export function EntryDialog({
   entry,
-  username,
+  author,
   onClose,
   onAdd,
 }: {
   entry: LibraryEntry | null;
-  username: string;
+  author: Profile | null;
   onClose: () => void;
   /** Ouvre la fenêtre d'ajout à ma bibliothèque */
   onAdd: (book: Book) => void;
@@ -57,9 +58,12 @@ export function EntryDialog({
             </div>
           </div>
 
-          <p className="small muted">
-            Avis de <Link href={profileHref(username)}>@{username}</Link>
-          </p>
+          {author && (
+            <p className="small muted with-avatar">
+              <Avatar url={author.avatar_url} username={author.username} size={24} />
+              Avis de <Link href={profileHref(author.username)}>@{author.username}</Link>
+            </p>
+          )}
           {entry.rating ? <Stars value={entry.rating} /> : <p className="muted">Pas de note</p>}
           {entry.review ? (
             <blockquote className="review">{entry.review}</blockquote>
