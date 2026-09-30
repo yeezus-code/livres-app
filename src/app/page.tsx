@@ -73,7 +73,7 @@ export default function HomePage() {
           <h1 className="hero__title">
             {account?.username ? (
               <>
-                Bonjour <em>@{account.username}</em>
+                Bonjour <em>{account.username}</em>
               </>
             ) : (
               <>
