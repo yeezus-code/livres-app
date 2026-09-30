@@ -323,19 +323,18 @@ export const fr = {
   },
 
   share: {
-    imageEyebrow: "Mon top {n}",
-    pageTitle: "Le top {n} de @{name}",
+    pageTitle: "Mon top {n}",
+    imageSubtitle: "Mes livres préférés",
     intro: "Envoyez-le à vos amis ou publiez-le sur vos réseaux.",
     share: "Partager",
     download: "Télécharger l'image",
     copy: "Copier le lien",
     copied: "Lien copié ✓",
     shareText: "Mon top {n} sur Codex",
-    empty: "@{name} n'a pas encore composé son top.",
-    seeProfile: "Voir le profil de @{name}",
+    empty: "Ce lecteur n'a pas encore composé son top.",
     shareMyTop: "Partager mon top",
     needAccount: "Créez un compte pour partager votre top.",
-    imageAlt: "Le top {n} de @{name}",
+    imageAlt: "Mon top {n} : les couvertures de mes livres préférés",
   },
 
   install: {

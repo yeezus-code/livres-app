@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, top } = await read(params);
   if (!top || !top.books.length) return {};
   const t = DICTIONARIES[locale];
-  const title = `${fmt(locale, t.share.pageTitle, { n: top.books.length, name: top.username })} — ${SITE.name}`;
+  const title = `${fmt(locale, t.share.pageTitle, { n: top.books.length })} — ${SITE.name}`;
   const image = { url: topImagePath(top, locale), width: 1080, height: 1350, alt: title };
   return {
     title,
@@ -36,10 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function TopSharePage({ params }: Props) {
-  const { locale, username, top } = await read(params);
+  const { locale, top } = await read(params);
   return (
     <TopShare
-      username={top?.username ?? username}
       count={top?.books.length ?? 0}
       imagePath={top && top.books.length ? topImagePath(top, locale) : null}
     />

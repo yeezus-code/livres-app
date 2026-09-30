@@ -3,15 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useI18n } from "@/i18n/I18nProvider";
-import { profileHref } from "@/lib/social";
 
 /** Page de partage d'un top : l'image, et les boutons Partager / Télécharger / Copier le lien. */
 export function TopShare({
-  username,
   count,
   imagePath,
 }: {
-  username: string;
   count: number;
   imagePath: string | null;
 }) {
@@ -22,16 +19,16 @@ export function TopShare({
   if (!imagePath) {
     return (
       <div className="empty">
-        <p>{f(t.share.empty, { name: username })}</p>
-        <Link href={href(profileHref(username))} className="btn btn--primary">
-          {f(t.share.seeProfile, { name: username })}
+        <p>{t.share.empty}</p>
+        <Link href={href("/lecteurs")} className="btn btn--primary">
+          {t.home.discoverReaders}
         </Link>
       </div>
     );
   }
 
-  const title = f(t.share.pageTitle, { n: count, name: username });
-  const fileName = `codex-top-${username}.png`;
+  const title = f(t.share.pageTitle, { n: count });
+  const fileName = `codex-top-${count}.png`;
 
   async function copyLink() {
     try {
@@ -71,7 +68,13 @@ export function TopShare({
       <h1 className="page-title">{title}</h1>
       <p className="muted">{t.share.intro}</p>
       {/* eslint-disable-next-line @next/next/no-img-element -- image générée par /api/top-image */}
-      <img className="top-share__image" src={imagePath} alt={title} width={1080} height={1350} />
+      <img
+        className="top-share__image"
+        src={imagePath}
+        alt={f(t.share.imageAlt, { n: count })}
+        width={1080}
+        height={1350}
+      />
       <div className="top-share__actions">
         <button className="btn btn--primary" onClick={share} disabled={busy}>
           {busy ? "…" : t.share.share}
@@ -83,9 +86,6 @@ export function TopShare({
           {copied ? t.share.copied : t.share.copy}
         </button>
       </div>
-      <p className="center small">
-        <Link href={href(profileHref(username))}>{f(t.share.seeProfile, { name: username })}</Link>
-      </p>
     </div>
   );
 }

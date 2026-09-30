@@ -7,7 +7,8 @@ import { fmt } from "@/i18n/format";
 import { SITE } from "@/lib/site";
 import { fetchSharedTop, type TopBook } from "@/lib/top-share";
 
-// GET /api/top-image?u=leo&lang=fr → l'image du top 10 de @leo (1080 × 1350, format Instagram)
+// GET /api/top-image?u=leo&lang=fr → l'image du top 10 de @leo (1080 × 1350, format Instagram).
+// Le pseudo n'apparaît pas sur l'image.
 
 const WIDTH = 1080;
 const HEIGHT = 1350;
@@ -53,72 +54,124 @@ async function loadCover(url: string | null): Promise<string | null> {
 }
 
 const COVER_COLORS = ["#8a1c24", "#1d5e7a", "#3f7a4a", "#5b3a5e", "#a0612a"];
+// Pastilles du podium : or, argent, bronze ; puis un doré discret pour les suivants
+const MEDALS = ["#ecc267", "#d9dee2", "#d9a066"];
 
-function Cover({ book, src, rank, width }: { book: TopBook; src: string | null; rank: number; width: number }) {
+type Placed = { book: TopBook; src: string | null; rank: number };
+
+function Cover({ item, width, badge }: { item: Placed; width: number; badge: number }) {
   const height = Math.round(width * 1.5);
+  const medal = MEDALS[item.rank - 1];
   return (
-    <div style={{ display: "flex", flexDirection: "column", width }}>
-      <div style={{ display: "flex", position: "relative", width, height }}>
-        {src ? (
-          // eslint-disable-next-line @next/next/no-img-element -- image générée, pas de page web
-          <img src={src} width={width} height={height} style={{ borderRadius: 8, objectFit: "cover" }} alt="" />
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width,
-              height,
-              padding: 14,
-              borderRadius: 8,
-              background: COVER_COLORS[rank % COVER_COLORS.length],
-              color: PAPER,
-              fontFamily: "Fraunces",
-              fontStyle: "italic",
-              fontSize: 22,
-              textAlign: "center",
-            }}
-          >
-            {book.title.slice(0, 60)}
-          </div>
-        )}
+    <div style={{ display: "flex", position: "relative", width, height }}>
+      {item.src ? (
+        // eslint-disable-next-line @next/next/no-img-element -- image générée, pas de page web
+        <img
+          src={item.src}
+          width={width}
+          height={height}
+          alt=""
+          style={{ borderRadius: 6, objectFit: "cover", boxShadow: "0 18px 30px rgba(0, 0, 0, 0.45)" }}
+        />
+      ) : (
         <div
           style={{
             display: "flex",
-            position: "absolute",
-            top: -14,
-            left: -14,
-            width: 48,
-            height: 48,
-            borderRadius: 24,
             alignItems: "center",
             justifyContent: "center",
-            background: GOLD,
-            color: INK,
-            fontFamily: "Inter",
+            width,
+            height,
+            padding: Math.round(width / 10),
+            borderRadius: 6,
+            background: COVER_COLORS[item.rank % COVER_COLORS.length],
+            boxShadow: "0 18px 30px rgba(0, 0, 0, 0.45)",
+            color: PAPER,
+            fontFamily: "Fraunces",
+            fontStyle: "italic",
             fontWeight: 600,
-            fontSize: 24,
-            border: `3px solid ${INK}`,
+            fontSize: Math.max(16, Math.round(width / 9)),
+            textAlign: "center",
           }}
         >
-          {rank}
+          {item.book.title.slice(0, 60)}
         </div>
-      </div>
+      )}
+      {/* Numéro, posé à cheval sur le bas de la couverture */}
       <div
         style={{
-          display: "block",
-          marginTop: 12,
-          color: PAPER,
-          fontFamily: "Inter",
-          fontWeight: 600,
-          fontSize: 20,
-          lineHeight: 1.25,
-          lineClamp: 2,
+          display: "flex",
+          position: "absolute",
+          bottom: -Math.round(badge / 2),
+          left: Math.round((width - badge) / 2),
+          width: badge,
+          height: badge,
+          borderRadius: badge / 2,
+          alignItems: "center",
+          justifyContent: "center",
+          background: medal ?? INK,
+          color: medal ? INK : GOLD,
+          border: medal ? `4px solid ${INK}` : `2px solid ${GOLD}`,
+          fontFamily: "Fraunces",
+          fontWeight: 500,
+          fontSize: Math.round(badge * 0.48),
         }}
       >
-        {book.title}
+        {String(item.rank)}
       </div>
+    </div>
+  );
+}
+
+/** Titre raccourci pour tenir sur deux lignes sous une couverture. */
+function shortTitle(title: string, max: number) {
+  return title.length <= max ? title : title.slice(0, max - 1).trimEnd() + "…";
+}
+
+/** Une étagère : les couvertures posées sur une planche dorée (dessinée derrière les numéros). */
+function Shelf({ items, width, gap, badge, titles }: { items: Placed[]; width: (rank: number) => number; gap: number; badge: number; titles: boolean }) {
+  const rowHeight = Math.max(...items.map((item) => Math.round(width(item.rank) * 1.5)));
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", width: 940 }}>
+      <div
+        style={{
+          display: "flex",
+          position: "absolute",
+          top: rowHeight - 3,
+          left: 0,
+          width: 940,
+          height: 10,
+          borderRadius: 5,
+          background: "linear-gradient(90deg, rgba(236,194,103,0.15), #ecc267 50%, rgba(236,194,103,0.15))",
+          boxShadow: "0 12px 26px rgba(0, 0, 0, 0.55)",
+        }}
+      />
+      <div style={{ display: "flex", alignItems: "flex-end", gap, height: rowHeight }}>
+        {items.map((item) => (
+          <Cover key={item.rank} item={item} width={width(item.rank)} badge={badge} />
+        ))}
+      </div>
+      {titles && (
+        <div style={{ display: "flex", gap, marginTop: badge / 2 + 18 }}>
+          {items.map((item) => (
+            <div
+              key={item.rank}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                width: width(item.rank),
+                color: PAPER,
+                fontFamily: "Inter",
+                fontWeight: 600,
+                fontSize: 22,
+                lineHeight: 1.3,
+                textAlign: "center",
+              }}
+            >
+              {shortTitle(item.book.title, Math.round(width(item.rank) / 6.5))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -133,19 +186,22 @@ export async function GET(request: Request) {
   if (!top || !top.books.length) return new Response("Top introuvable", { status: 404 });
 
   const covers = await Promise.all(top.books.map((b) => loadCover(b.coverUrl)));
-  const count = top.books.length;
-  // Jusqu'à 5 livres par rangée ; des couvertures plus grandes s'il y en a peu
-  const perRow = count <= 3 ? count : count <= 4 ? 2 : count <= 6 ? 3 : 5;
-  // Largeur utile : 1080 − 2 × 70 de marge = 940 pixels, moins les espaces entre couvertures
-  const gap = perRow === 5 ? 20 : 40;
-  const coverWidth = Math.min(260, Math.floor((940 - gap * (perRow - 1)) / perRow));
-  const rows = Array.from({ length: Math.ceil(count / perRow) }, (_, r) =>
-    top.books.slice(r * perRow, r * perRow + perRow).map((book, i) => ({
-      book,
-      rank: r * perRow + i + 1,
-      src: covers[r * perRow + i],
-    })),
-  );
+  const placed: Placed[] = top.books.map((book, i) => ({ book, src: covers[i], rank: i + 1 }));
+  const count = placed.length;
+
+  // Le podium : n° 2, n° 1 (au centre, plus grand), n° 3
+  const podium = placed.slice(0, 3);
+  const podiumOrder = count >= 2 ? [podium[1], podium[0], podium[2]].filter(Boolean) : podium;
+  // Les suivants, sur une seconde étagère
+  const rest = placed.slice(3);
+  // Sans seconde étagère, le podium a toute la place
+  const podiumWidth = (rank: number) =>
+    rest.length ? (rank === 1 ? 250 : 200) : rank === 1 ? 310 : 250;
+  const restGap = 18;
+  const restWidth = Math.min(150, Math.floor((900 - restGap * (rest.length - 1)) / Math.max(rest.length, 1)));
+
+  // « Mon top 10 » : le nombre en doré
+  const [before, after] = fmt(locale, t.share.pageTitle, { n: "#" }).split("#");
 
   return new ImageResponse(
     (
@@ -153,65 +209,57 @@ export async function GET(request: Request) {
         style={{
           display: "flex",
           flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "space-between",
           width: "100%",
           height: "100%",
-          padding: "80px 70px 60px",
-          background: `linear-gradient(165deg, #0e4f4c, ${INK} 70%)`,
+          padding: "84px 70px 64px",
+          backgroundColor: INK,
+          backgroundImage:
+            "radial-gradient(circle at 50% 42%, rgba(236, 194, 103, 0.20), rgba(236, 194, 103, 0) 48%), " +
+            "linear-gradient(170deg, #0f5552, #0b2b29 62%, #081f1e)",
           color: PAPER,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div
             style={{
               fontFamily: "Inter",
               fontWeight: 600,
-              fontSize: 28,
-              letterSpacing: 6,
+              fontSize: 24,
+              letterSpacing: 8,
               textTransform: "uppercase",
-              color: GOLD,
+              color: "rgba(236, 194, 103, 0.85)",
             }}
           >
-            {fmt(locale, t.share.imageEyebrow, { n: count })}
+            {t.share.imageSubtitle}
           </div>
-          <div style={{ fontFamily: "Fraunces", fontStyle: "italic", fontWeight: 600, fontSize: 84, marginTop: 8 }}>
-            {`@${top.username}`}
+          <div style={{ display: "flex", alignItems: "baseline", marginTop: 6, fontFamily: "Fraunces", fontStyle: "italic", fontWeight: 600, fontSize: 104, lineHeight: 1.1 }}>
+            <span>{before.trim()}</span>
+            <span style={{ color: GOLD, marginLeft: before.endsWith(" ") ? 28 : 0 }}>{String(count)}</span>
+            {after.trim() && <span style={{ marginLeft: after.startsWith(" ") ? 28 : 0 }}>{after.trim()}</span>}
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "center", gap: 44 }}>
-          {rows.map((row, r) => (
-            <div key={r} style={{ display: "flex", justifyContent: "center", gap }}>
-              {row.map(({ book, rank, src }) => (
-                <Cover key={rank} book={book} src={src} rank={rank} width={coverWidth} />
-              ))}
-            </div>
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 70 }}>
+          <Shelf items={podiumOrder} width={podiumWidth} gap={34} badge={64} titles />
+          {rest.length > 0 && (
+            <Shelf items={rest} width={() => restWidth} gap={restGap} badge={44} titles={false} />
+          )}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: 28,
-            borderTop: "2px solid rgba(236, 194, 103, 0.5)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- image générée */}
-            <img src={LOGO} width={64} height={58} alt="" />
-            <div style={{ fontFamily: "Fraunces", fontStyle: "italic", fontWeight: 600, fontSize: 48 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- image générée */}
+          <img src={LOGO} width={58} height={52} alt="" />
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <span style={{ fontFamily: "Fraunces", fontStyle: "italic", fontWeight: 600, fontSize: 44 }}>
               {SITE.name}
-            </div>
-            <div style={{ display: "flex", width: 12, height: 12, borderRadius: 6, background: GOLD, marginTop: 22, marginLeft: -12 }} />
+            </span>
+            <span style={{ color: GOLD, fontFamily: "Fraunces", fontSize: 44 }}>.</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-            <div style={{ fontFamily: "Inter", fontWeight: 600, fontSize: 26, color: GOLD }}>
-              {SITE.url.replace("https://", "")}
-            </div>
-            <div style={{ fontFamily: "Inter", fontSize: 22, color: "rgba(247, 243, 234, 0.7)" }}>
-              {t.meta.tagline}
-            </div>
+          <div style={{ display: "flex", width: 2, height: 36, background: "rgba(247, 243, 234, 0.3)", marginLeft: 6, marginRight: 6 }} />
+          <div style={{ fontFamily: "Inter", fontWeight: 600, fontSize: 26, color: GOLD }}>
+            {SITE.url.replace("https://", "")}
           </div>
         </div>
       </div>

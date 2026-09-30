@@ -316,19 +316,18 @@ export const en: Dictionary = {
   },
 
   share: {
-    imageEyebrow: "My top {n}",
-    pageTitle: "@{name}'s top {n}",
+    pageTitle: "My top {n}",
+    imageSubtitle: "My favorite books",
     intro: "Send it to your friends or post it on social media.",
     share: "Share",
     download: "Download the image",
     copy: "Copy the link",
     copied: "Link copied ✓",
     shareText: "My top {n} on Codex",
-    empty: "@{name} hasn't built a top yet.",
-    seeProfile: "See @{name}'s profile",
+    empty: "This reader hasn't built a top yet.",
     shareMyTop: "Share my top",
     needAccount: "Create an account to share your top.",
-    imageAlt: "@{name}'s top {n}",
+    imageAlt: "My top {n}: the covers of my favorite books",
   },
 
   install: {

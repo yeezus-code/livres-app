@@ -316,19 +316,18 @@ export const es: Dictionary = {
   },
 
   share: {
-    imageEyebrow: "Mi top {n}",
-    pageTitle: "El top {n} de @{name}",
+    pageTitle: "Mi top {n}",
+    imageSubtitle: "Mis libros favoritos",
     intro: "Envíalo a tus amigos o publícalo en tus redes.",
     share: "Compartir",
     download: "Descargar la imagen",
     copy: "Copiar el enlace",
     copied: "Enlace copiado ✓",
     shareText: "Mi top {n} en Codex",
-    empty: "@{name} todavía no ha creado su top.",
-    seeProfile: "Ver el perfil de @{name}",
+    empty: "Este lector todavía no ha creado su top.",
     shareMyTop: "Compartir mi top",
     needAccount: "Crea una cuenta para compartir tu top.",
-    imageAlt: "El top {n} de @{name}",
+    imageAlt: "Mi top {n}: las portadas de mis libros favoritos",
   },
 
   install: {
