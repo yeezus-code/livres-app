@@ -60,7 +60,15 @@ export default function HomePage() {
     <>
       <section className="hero">
         <h1 className="hero__title">
-          {account?.username ? `Bonjour @${account.username}` : "Vos lectures, vos notes, vos avis."}
+          {account?.username ? (
+            <>
+              Bonjour <em>@{account.username}</em>
+            </>
+          ) : (
+            <>
+              Vos lectures, vos notes, <em>vos avis</em>.
+            </>
+          )}
         </h1>
         <p className="hero__text">
           {entries.length > 0

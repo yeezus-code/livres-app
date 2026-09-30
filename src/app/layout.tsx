@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Header, StatusBanner } from "@/components/Header";
 import { LibraryProvider } from "@/components/LibraryProvider";
+// Polices intégrées au site (pas besoin de Google Fonts) : Fraunces pour les titres, Inter pour le texte
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/fraunces/wght-italic.css";
+import "@fontsource-variable/inter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f6b6b",
+  themeColor: "#f7f3ea",
   viewportFit: "cover", // la barre du bas respecte la zone du geste « accueil » des iPhone
 };
 

@@ -190,12 +190,10 @@ export default function TopPage() {
 
       {others.length > 0 && (
         <>
-          <h2 className="section-title">
-            Ma bibliothèque{" "}
-            <span className="muted small">
-              {full ? `(top complet : ${TOP_SIZE} livres maximum)` : "(touchez + pour ajouter)"}
-            </span>
-          </h2>
+          <h2 className="section-title">Ma bibliothèque</h2>
+          <p className="muted small section-hint">
+            {full ? `Top complet : ${TOP_SIZE} livres maximum.` : "Touchez + pour ajouter un livre au top."}
+          </p>
           <ul className="top top--pick">
             {others.map((entry) => (
               <li key={entry.id} className="top__item">
