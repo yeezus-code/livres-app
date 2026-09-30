@@ -14,7 +14,10 @@ Une application web pour noter ses lectures, dans l'esprit de Letterboxd.
 - « Mon top » : un classement de 10 livres maximum, dans l'ordre de son choix (on peut
   partir de ses livres les mieux notés).
 
-**À venir** : profils publics, abonnements.
+- Profils publics (`/u/pseudo`) : bibliothèque, notes, avis et top de chaque lecteur.
+- Page « Lecteurs » : trouver des lecteurs par pseudo, s'abonner, suivre leur activité.
+
+Les bibliothèques des comptes sont publiques ; celles des visiteurs sans compte restent privées.
 
 ---
 
@@ -132,6 +135,16 @@ Dans Supabase → **SQL Editor** → **New query** : copiez tout le contenu de
 Test : onglet **Top** → **Partir de mes mieux notés** (ou **Composer mon top**), réordonnez
 avec ↑ ↓, **Enregistrer**, puis rechargez la page : l'ordre est conservé.
 
+### Étape 7 — Activer les profils publics et les abonnements
+
+Dans Supabase → **SQL Editor** → **New query** : copiez tout le contenu de
+[`supabase/04-social.sql`](supabase/04-social.sql), collez-le, cliquez **Run**.
+
+Test : onglet **Compte** → **Voir mon profil public**. Envoyez l'adresse de cette page à
+quelqu'un : il voit vos livres, vos notes, vos avis et votre top. Onglet **Lecteurs** :
+cherchez un pseudo, ouvrez son profil, **S'abonner** ; ses lectures apparaissent dans
+« Activité ».
+
 > Sans compte, la bibliothèque est liée au navigateur. En se connectant sur un appareil où
 > des livres avaient été ajoutés sans compte, ces livres sont copiés dans le compte.
 
@@ -159,3 +172,7 @@ npm run dev                  # http://localhost:3000
 | `src/app/compte/page.tsx`               | création de compte, connexion, déconnexion                  |
 | `supabase/03-top.sql`                   | colonne `top_position` et fonction `set_top`                |
 | `src/app/top/page.tsx`                  | page « Mon top » (lecture et modification)                  |
+| `supabase/04-social.sql`                | lecture publique des bibliothèques, table `follows`         |
+| `src/lib/social.ts`                     | profils publics, abonnements, fil d'activité                |
+| `src/app/u/[pseudo]/page.tsx`           | profil public d'un lecteur                                  |
+| `src/app/lecteurs/page.tsx`             | recherche de lecteurs, abonnements, activité                |

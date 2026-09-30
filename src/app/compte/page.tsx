@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import { profileHref } from "@/lib/social";
 import { normalizeUsername, PASSWORD_MIN_LENGTH, toFrenchMessage } from "@/lib/account";
 import { useLibrary } from "@/components/LibraryProvider";
 
@@ -195,6 +197,9 @@ function Profile() {
         <p>
           {entries.length} livre{entries.length > 1 ? "s" : ""} dans la bibliothèque, dont {rated}{" "}
           noté{rated > 1 ? "s" : ""}.
+        </p>
+        <p>
+          <Link href={profileHref(account!.username!)}>Voir mon profil public</Link>
         </p>
         {error && <p className="error">{error}</p>}
         <button

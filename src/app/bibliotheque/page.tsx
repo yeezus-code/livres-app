@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Book } from "@/lib/books";
 import { entryToBook } from "@/lib/library";
-import { BookCover } from "@/components/BookCover";
 import { BookDialog } from "@/components/BookDialog";
+import { BookGrid } from "@/components/BookGrid";
 import { useLibrary } from "@/components/LibraryProvider";
-import { Stars } from "@/components/StarRating";
 
 type Sort = "recent" | "rating" | "title";
 
@@ -59,19 +58,7 @@ export default function LibraryPage() {
           </Link>
         </div>
       ) : (
-        <ul className="grid">
-          {sorted.map((entry) => (
-            <li key={entry.id}>
-              <button className="tile" onClick={() => setSelected(entryToBook(entry))}>
-                <BookCover src={entry.cover_url} title={entry.title} />
-                <span className="tile__title">{entry.title}</span>
-                {entry.authors[0] && <span className="tile__author">{entry.authors[0]}</span>}
-                <Stars value={entry.rating} />
-                {entry.review && <span className="tile__review">« {entry.review} »</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <BookGrid entries={sorted} onSelect={(entry) => setSelected(entryToBook(entry))} />
       )}
 
       <BookDialog book={selected} onClose={() => setSelected(null)} />

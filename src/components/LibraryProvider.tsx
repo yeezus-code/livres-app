@@ -79,6 +79,7 @@ async function loadEverything(supabase: SupabaseClient) {
   const { data: entries, error } = await supabase
     .from("library_entries")
     .select("*")
+    .eq("user_id", user.id) // les bibliothèques des autres sont lisibles aussi : on filtre
     .order("created_at", { ascending: false });
   if (error) throw error;
 
@@ -165,7 +166,13 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const remove = useCallback(async (bookId: string) => {
-    const { error } = await requireSupabase().from("library_entries").delete().eq("book_id", bookId);
+    const supabase = requireSupabase();
+    const { data } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("library_entries")
+      .delete()
+      .eq("user_id", data.user?.id ?? "")
+      .eq("book_id", bookId);
     if (error) throw error;
     setEntries((current) => current.filter((e) => e.book_id !== bookId));
   }, []);

@@ -129,6 +129,9 @@ textarea {
 
 .nav__link:hover { color: #fff; }
 
+.nav__icon { display: none; width: 22px; height: 22px; fill: currentColor; }
+.nav__short { display: none; }
+
 /* Sur téléphone : le logo reste en haut, les onglets passent en barre en bas d'écran */
 @media (max-width: 600px) {
   .header__inner { padding: 0.6rem 1rem; }
@@ -151,14 +154,21 @@ textarea {
 
   .nav__link {
     max-width: none;
-    text-align: center;
-    padding: 0.6rem 0.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.35rem 0.1rem;
     border-radius: 8px;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
   }
 
-  .main { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
-  .sticky-actions { bottom: calc(3.4rem + env(safe-area-inset-bottom)); }
+  .nav__icon { display: block; }
+  .nav__label { display: none; }
+  .nav__short { display: block; }
+
+  .main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+  .sticky-actions { bottom: calc(4rem + env(safe-area-inset-bottom)); }
 }
 
 .nav__link[aria-current="page"] {
@@ -650,3 +660,154 @@ textarea {
   justify-content: center;
   flex-wrap: wrap;
 }
+
+/* ==========================================================================
+   Profils publics et page « Lecteurs »
+   ========================================================================== */
+.profile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-head__name { margin-bottom: 0.25rem; overflow-wrap: anywhere; }
+
+.profile-head__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+}
+
+.profile-head__stats strong { color: var(--text); }
+
+.badge {
+  background: var(--teal-50);
+  color: var(--teal-700);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Le top d'un lecteur : une étagère de couvertures numérotées */
+.shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0.25rem 0.5rem 0.45rem; /* place pour les pastilles numérotées */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 96px;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.shelf li { scroll-snap-align: start; }
+
+.shelf__item {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.shelf__rank {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--teal-700);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+}
+
+.shelf li:nth-child(-n + 3) .shelf__rank { background: var(--star); }
+
+.review {
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--teal-50);
+  border-left: 3px solid var(--teal-600);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--teal-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.chip:hover { background: var(--teal-50); }
+
+.feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 640px;
+}
+
+.feed__item {
+  display: flex;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.7rem;
+  text-align: left;
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.feed__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.feed__title { font-weight: 600; overflow-wrap: anywhere; }
