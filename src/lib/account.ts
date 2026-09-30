@@ -40,6 +40,14 @@ export function toFrenchMessage(error: unknown): string {
   if ((error as Error)?.message?.includes("Bucket not found")) {
     return "Le stockage des photos n'existe pas encore : lancez 05-photos-et-accueil.sql (README).";
   }
+  const message = (error as Error)?.message ?? String(error);
+  if (/error sending/i.test(message)) {
+    // Supabase n'a pas réussi à passer l'e-mail au service d'envoi (Brevo)
+    return (
+      "L'e-mail n'a pas pu partir : Supabase n'arrive pas à se connecter au service d'envoi. " +
+      "Vérifiez les réglages SMTP (README, étape 9). Détail technique : " + message
+    );
+  }
   const code = (error as { code?: string })?.code;
   switch (code) {
     case "email_exists":
@@ -72,6 +80,7 @@ export function toFrenchMessage(error: unknown): string {
       return "Ce pseudo est déjà pris.";
     default:
       console.error(error);
-      return "Une erreur est survenue. Vérifiez votre connexion et réessayez.";
+      // Le détail technique aide à trouver la cause si le problème persiste
+      return `Une erreur est survenue. Réessayez dans un instant. (Détail technique : ${message})`;
   }
 }
