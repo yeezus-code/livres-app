@@ -1,6 +1,6 @@
-# Livres — suivi de lectures
+# Codex — carnet de lecture
 
-Une application web pour noter ses lectures, dans l'esprit de Letterboxd.
+Codex : une application web pour noter ses lectures, dans l'esprit de Letterboxd. (Nom, slogan et adresse de contact : fichier `src/lib/site.ts`.)
 
 **Ce qui existe aujourd'hui**
 

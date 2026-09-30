@@ -13,6 +13,7 @@ import {
   type Review,
 } from "@/lib/home";
 import { timeAgo } from "@/lib/social";
+import { SITE } from "@/lib/site";
 import { getSupabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
 import { BookCover } from "@/components/BookCover";
@@ -59,6 +60,7 @@ export default function HomePage() {
   return (
     <>
       <section className="hero">
+        <p className="hero__eyebrow">{SITE.name} · carnet de lecture</p>
         <h1 className="hero__title">
           {account?.username ? (
             <>
@@ -110,7 +112,7 @@ export default function HomePage() {
       </section>
 
       {community && community.best.length > 0 && (
-        <section className="home-section">
+        <section className="home-section band">
           <h2 className="section-title">Les mieux notés par nos lecteurs</h2>
           <BookShelf
             items={community.best.map((s) => ({

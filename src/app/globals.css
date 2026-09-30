@@ -16,6 +16,11 @@
   --muted: #6a6f67;       /* texte secondaire */
   --border: #e5dccb;      /* filets et bordures */
   --star: #d4951b;        /* étoiles, or */
+  --gold-light: #ecc267;  /* or clair, sur fond sombre */
+  --ink: #0b2b29;         /* bandeaux sombres (en-tête, accueil, pied de page) */
+  --sand: #efe6d3;        /* bandeaux clairs alternés */
+  --on-ink: #f7f3ea;      /* texte sur bandeau sombre */
+  --on-ink-muted: rgb(247 243 234 / 0.72);
   --danger: #a8321f;
 
   --radius: 12px;
@@ -43,6 +48,7 @@ body {
   font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip; /* les bandeaux « pleine largeur » ne créent pas de défilement horizontal */
 }
 
 a {
@@ -97,10 +103,8 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgb(247 243 234 / 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
+  background: var(--ink);
+  border-bottom: 1px solid rgb(236 194 103 / 0.25); /* filet doré */
 }
 
 .header__inner {
@@ -117,12 +121,12 @@ textarea {
   font-size: 1.5rem;
   font-weight: 700;
   font-style: italic;
-  color: var(--teal-900);
+  color: var(--on-ink);
   text-decoration: none;
   letter-spacing: -0.02em;
 }
 
-.logo::after { content: "."; color: var(--star); }
+.logo::after { content: "."; color: var(--gold-light); }
 
 .nav {
   display: flex;
@@ -131,7 +135,7 @@ textarea {
 }
 
 .nav__link {
-  color: var(--muted);
+  color: var(--on-ink-muted);
   font-weight: 500;
   text-decoration: none;
   max-width: 9rem; /* un pseudo long est coupé avec « … » */
@@ -142,11 +146,11 @@ textarea {
   border-radius: 999px;
 }
 
-.nav__link:hover { color: var(--teal-700); }
+.nav__link:hover { color: var(--on-ink); }
 
 .nav__icon { display: none; width: 22px; height: 22px; fill: currentColor; }
 .nav__avatar { display: inline-flex; margin-right: 0.4rem; vertical-align: middle; }
-.nav__avatar .avatar { box-shadow: 0 0 0 1.5px var(--border); }
+.nav__avatar .avatar { box-shadow: 0 0 0 1.5px var(--gold-light); }
 .nav__short { display: none; }
 
 /* Sur téléphone : le logo reste en haut, les onglets passent en barre en bas d'écran */
@@ -164,10 +168,8 @@ textarea {
     display: grid;
     grid-auto-columns: 1fr;
     grid-auto-flow: column;
-    background: rgb(255 253 248 / 0.96);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-top: 1px solid var(--border);
+    background: var(--ink);
+    border-top: 1px solid rgb(236 194 103 / 0.25);
     padding: 0.35rem 0.35rem calc(0.35rem + env(safe-area-inset-bottom));
   }
 
@@ -187,13 +189,13 @@ textarea {
   .nav__label { display: none; }
   .nav__short { display: block; }
 
-  .main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+  body { padding-bottom: calc(4.3rem + env(safe-area-inset-bottom)); }
   .sticky-actions { bottom: calc(4rem + env(safe-area-inset-bottom)); }
 }
 
 .nav__link[aria-current="page"] {
-  background: var(--teal-50);
-  color: var(--teal-700);
+  background: rgb(255 255 255 / 0.1);
+  color: var(--gold-light);
 }
 
 /* ==========================================================================
@@ -201,6 +203,7 @@ textarea {
    ========================================================================== */
 .main {
   max-width: 960px;
+  min-height: 60vh;
   margin: 0 auto;
   padding: 1rem 1rem 3rem;
 }
@@ -708,8 +711,8 @@ textarea {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
+  margin-top: -1rem;
+  padding: 1.75rem 0;
 }
 
 .profile-head__main { flex: 1; min-width: 12rem; }
@@ -925,24 +928,50 @@ textarea {
 /* ==========================================================================
    Page d'accueil
    ========================================================================== */
+/* Grand bandeau sombre, sur toute la largeur de l'écran */
 .hero {
-  padding: 2.25rem 0 2rem;
+  position: relative;
+  isolation: isolate;
+  margin-top: -1rem; /* colle à l'en-tête */
+  padding: 3rem 0 2.75rem;
   text-align: center;
+  color: var(--on-ink);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 60% 70% at 15% 0%, rgb(236 194 103 / 0.18), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 90% 100%, rgb(21 122 117 / 0.45), transparent 70%),
+    linear-gradient(165deg, #0e4f4c, var(--ink) 70%);
+  border-bottom: 3px solid var(--gold-light);
+}
+
+.hero__eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-light);
 }
 
 .hero__title {
-  font-size: clamp(2rem, 7vw, 3.1rem);
+  font-size: clamp(2.1rem, 7.5vw, 3.4rem);
   font-weight: 500;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.9rem;
   overflow-wrap: anywhere;
 }
 
-.hero__title em { color: var(--teal-700); font-weight: 600; }
+.hero__title em { color: var(--gold-light); font-weight: 500; }
 
 .hero__text {
   max-width: 34rem;
-  margin: 0 auto 1.5rem;
-  color: var(--muted);
+  margin: 0 auto 1.75rem;
+  color: var(--on-ink-muted);
 }
 
 .hero__search {
@@ -964,8 +993,9 @@ textarea {
   box-shadow: var(--shadow);
 }
 
-.hero__search .btn { min-height: 50px; background: var(--teal-700); color: #fff; }
-.hero__search .btn:hover { background: var(--teal-900); }
+.hero__search input { border-color: transparent; }
+.hero__search .btn { min-height: 50px; background: var(--gold-light); color: var(--ink); }
+.hero__search .btn:hover:not(:disabled) { background: #f3d48a; }
 
 .home-section { margin-bottom: 1.75rem; }
 .home-section .section-title { margin-top: 0; }
@@ -1153,3 +1183,93 @@ p.with-avatar { display: flex; }
 @media (prefers-reduced-motion: reduce) {
   .main > *:not(dialog) { animation: none; }
 }
+
+/* ==========================================================================
+   Bandeaux pleine largeur
+   « .band » : bande sable claire ; « .band--ink » : bande sombre.
+   ========================================================================== */
+.band {
+  position: relative;
+  isolation: isolate;
+  padding-block: 1.75rem 1.25rem;
+}
+
+.band::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: var(--sand);
+  border-block: 1px solid var(--border);
+}
+
+.band .section-title { margin-top: 0; }
+.band .rail__placeholder { background-color: #e6dcc6; }
+
+/* L'en-tête d'un profil public est posé sur une bande sable */
+.profile-head::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: var(--sand);
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-head { position: relative; isolation: isolate; margin-bottom: 0.5rem; }
+
+/* ==========================================================================
+   Pied de page
+   ========================================================================== */
+.footer {
+  background: var(--ink);
+  color: var(--on-ink-muted);
+  border-top: 3px solid var(--gold-light);
+  font-size: 0.9rem;
+}
+
+.footer__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.25rem 1rem 1.5rem;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+  .footer__inner { grid-template-columns: 2fr 1fr 1fr; }
+}
+
+.footer .logo { font-size: 1.6rem; }
+.footer__tagline { margin: 0.4rem 0 0; max-width: 24rem; }
+
+.footer__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+
+.footer__links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.footer a { color: var(--on-ink); text-decoration: none; }
+.footer a:hover { color: var(--gold-light); text-decoration: underline; }
+
+.footer__bottom {
+  grid-column: 1 / -1;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(247 243 234 / 0.12);
+  font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   Pages de texte (mentions légales)
+   ========================================================================== */
+.prose { max-width: 42rem; }
+.prose h2 { font-size: 1.3rem; margin: 2rem 0 0.5rem; }
+.prose p, .prose li { color: var(--text); }
+.prose .lead { font-size: 1.1rem; color: var(--muted); }
+
+.hero + .home-section { margin-top: 2.25rem; }

@@ -109,7 +109,7 @@ async function searchOpenLibrary(title: string, author?: string): Promise<Book[]
 
   const res = await fetch(url, {
     // Open Library demande d'identifier les applications qui utilisent son API
-    headers: { "User-Agent": "LivresApp/0.1 (application de suivi de lectures)" },
+    headers: { "User-Agent": "CodexApp/0.1 (carnet de lecture en ligne)" },
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Open Library a répondu ${res.status}`);

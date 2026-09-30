@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SITE } from "@/lib/site";
 import { Avatar } from "./Avatar";
 import { useLibrary } from "./LibraryProvider";
 
@@ -40,7 +41,7 @@ export function Header() {
     <header className="header">
       <div className="header__inner">
         <Link href="/" className="logo">
-          Livres
+          {SITE.name}
         </Link>
         <nav className="nav">
           {links.map((link) => (
