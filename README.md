@@ -339,6 +339,8 @@ npm run dev                  # http://localhost:3000
 | `supabase/05-photos-et-accueil.sql`     | photos (Storage), vue `book_stats`                          |
 | `src/app/[lang]/page.tsx`                      | page d'accueil                                              |
 | `src/app/[lang]/recherche/page.tsx`            | recherche de livres (`/recherche?q=…`)                      |
+| `src/app/api/top-image/route.tsx`      | image « top 10 » à partager (1080 × 1350)                   |
+| `src/app/[lang]/u/[pseudo]/top/page.tsx` | page de partage du top (aperçu du lien = l'image)         |
 | `src/app/api/liste/route.ts`            | livres d'une sélection (listes dans `src/collections/`)    |
 | `src/lib/site.ts`                       | nom du site, slogan, présentation, adresse de contact      |
 | `src/app/[lang]/mentions-legales/page.tsx`     | mentions légales                                            |

@@ -1,0 +1,5 @@
+Polices utilisées pour l'image « top 10 » (src/app/api/top-image/route.tsx) :
+- Fraunces — Copyright The Fraunces Project Authors
+- Inter — Copyright The Inter Project Authors
+Toutes deux sous licence SIL Open Font License 1.1 (https://openfontlicense.org),
+fichiers issus des paquets @fontsource/fraunces et @fontsource/inter.

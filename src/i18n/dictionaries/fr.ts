@@ -322,6 +322,22 @@ export const fr = {
     actionFailed: "L'opération a échoué. Réessayez.",
   },
 
+  share: {
+    imageEyebrow: "Mon top {n}",
+    pageTitle: "Le top {n} de @{name}",
+    intro: "Envoyez-le à vos amis ou publiez-le sur vos réseaux.",
+    share: "Partager",
+    download: "Télécharger l'image",
+    copy: "Copier le lien",
+    copied: "Lien copié ✓",
+    shareText: "Mon top {n} sur Codex",
+    empty: "@{name} n'a pas encore composé son top.",
+    seeProfile: "Voir le profil de @{name}",
+    shareMyTop: "Partager mon top",
+    needAccount: "Créez un compte pour partager votre top.",
+    imageAlt: "Le top {n} de @{name}",
+  },
+
   install: {
     title: "Installer l'appli {name}",
     lead:

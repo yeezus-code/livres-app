@@ -1755,3 +1755,20 @@ p.with-avatar { display: flex; }
 .cover-picker__item .cover { width: 100%; height: auto; aspect-ratio: 2 / 3; }
 .cover-picker__item[aria-pressed="true"] { border-color: var(--teal-700); }
 .cover-picker__item:hover { border-color: var(--border); }
+
+/* Partage du top en image */
+.top-share { max-width: 30rem; margin: 0 auto; }
+.top-share .page-title { margin-bottom: 0.25rem; }
+.top-share__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 14px;
+  background: var(--ink);
+  box-shadow: var(--shadow-book);
+  aspect-ratio: 1080 / 1350;
+}
+.top-share__actions { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+.top-share__actions .btn { width: 100%; text-align: center; }
+.top-share-link { margin: 0.5rem 0 1rem; }

@@ -10,7 +10,7 @@ import { Stars } from "@/components/StarRating";
 import { useI18n } from "@/i18n/I18nProvider";
 
 export default function TopPage() {
-  const { status, entries: allEntries, setTop } = useLibrary();
+  const { status, entries: allEntries, setTop, account } = useLibrary();
   // Seuls les livres lus peuvent entrer dans le top
   const entries = useMemo(() => allEntries.filter(isRead), [allEntries]);
   /** null = on regarde le top ; sinon = liste en cours de modification */
@@ -92,15 +92,28 @@ export default function TopPage() {
             </div>
           </div>
         ) : (
-          <ol className="top">
-            {savedTop.map((entry, index) => (
-              <li key={entry.id} className="top__item">
-                <span className="top__rank">{index + 1}</span>
-                <BookCover src={entry.cover_url} title={entry.title} size="sm" />
-                <BookInfo entry={entry} />
-              </li>
-            ))}
-          </ol>
+          <>
+            <p className="top-share-link">
+              {account?.username ? (
+                <Link href={href(`/u/${account.username}/top`)} className="btn btn--primary">
+                  ↗ {t.share.shareMyTop}
+                </Link>
+              ) : (
+                <span className="muted small">
+                  <Link href={href("/compte")}>{t.share.needAccount}</Link>
+                </span>
+              )}
+            </p>
+            <ol className="top">
+              {savedTop.map((entry, index) => (
+                <li key={entry.id} className="top__item">
+                  <span className="top__rank">{index + 1}</span>
+                  <BookCover src={entry.cover_url} title={entry.title} size="sm" />
+                  <BookInfo entry={entry} />
+                </li>
+              ))}
+            </ol>
+          </>
         )}
       </>
     );

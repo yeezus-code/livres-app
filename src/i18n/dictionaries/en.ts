@@ -315,6 +315,22 @@ export const en: Dictionary = {
     actionFailed: "Something went wrong. Please try again.",
   },
 
+  share: {
+    imageEyebrow: "My top {n}",
+    pageTitle: "@{name}'s top {n}",
+    intro: "Send it to your friends or post it on social media.",
+    share: "Share",
+    download: "Download the image",
+    copy: "Copy the link",
+    copied: "Link copied ✓",
+    shareText: "My top {n} on Codex",
+    empty: "@{name} hasn't built a top yet.",
+    seeProfile: "See @{name}'s profile",
+    shareMyTop: "Share my top",
+    needAccount: "Create an account to share your top.",
+    imageAlt: "@{name}'s top {n}",
+  },
+
   install: {
     title: "Install the {name} app",
     lead:

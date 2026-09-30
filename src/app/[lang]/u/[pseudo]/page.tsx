@@ -102,6 +102,11 @@ export default function PublicProfilePage() {
       {top.length > 0 && (
         <section>
           <h2 className="section-title">{t.profile.top}</h2>
+          <p className="small top-share-link">
+            <Link href={href(`/u/${profile.username}/top`)}>
+              ↗ {isMe ? t.share.shareMyTop : t.share.share}
+            </Link>
+          </p>
           <ol className="shelf">
             {top.map((entry, index) => (
               <li key={entry.id}>

@@ -315,6 +315,22 @@ export const pt: Dictionary = {
     actionFailed: "Não foi possível concluir. Tente novamente.",
   },
 
+  share: {
+    imageEyebrow: "Meu top {n}",
+    pageTitle: "O top {n} de @{name}",
+    intro: "Mande para os seus amigos ou publique nas suas redes.",
+    share: "Compartilhar",
+    download: "Baixar a imagem",
+    copy: "Copiar o link",
+    copied: "Link copiado ✓",
+    shareText: "Meu top {n} no Codex",
+    empty: "@{name} ainda não montou o top.",
+    seeProfile: "Ver o perfil de @{name}",
+    shareMyTop: "Compartilhar meu top",
+    needAccount: "Crie uma conta para compartilhar seu top.",
+    imageAlt: "O top {n} de @{name}",
+  },
+
   install: {
     title: "Instalar o app {name}",
     lead:
