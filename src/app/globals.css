@@ -135,7 +135,7 @@ textarea {
   letter-spacing: -0.02em;
 }
 
-.logo::after { content: "."; color: var(--gold-light); }
+.logo__text::after { content: "."; color: var(--gold-light); }
 
 .nav {
   display: flex;
@@ -1609,3 +1609,13 @@ p.with-avatar { display: flex; }
 
 /* Sur iPhone, les instructions iPhone passent en premier (déjà le cas dans la page) */
 .install-steps--first { border-color: var(--teal-100); }
+
+/* Logo : dessin de l'étagère + nom */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.logo-mark { flex-shrink: 0; transition: transform 0.2s ease; }
+.logo:hover .logo-mark { transform: rotate(-4deg); }

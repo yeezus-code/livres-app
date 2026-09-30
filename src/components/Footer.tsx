@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
+import { LogoMark } from "./LogoMark";
 
 export function Footer() {
   return (
@@ -7,7 +8,8 @@ export function Footer() {
       <div className="footer__inner">
         <div>
           <Link href="/" className="logo">
-            {SITE.name}
+            <LogoMark size={34} />
+            <span className="logo__text">{SITE.name}</span>
           </Link>
           <p className="footer__tagline">{SITE.tagline}.</p>
         </div>

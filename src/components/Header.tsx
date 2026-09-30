@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/site";
 import { Avatar } from "./Avatar";
+import { LogoMark } from "./LogoMark";
 import { useLibrary } from "./LibraryProvider";
 
 // Petites icônes (affichées seulement dans la barre du bas, sur téléphone)
@@ -40,8 +41,9 @@ export function Header() {
   return (
     <header className="header">
       <div className="header__inner">
-        <Link href="/" className="logo">
-          {SITE.name}
+        <Link href="/" className="logo" aria-label={`${SITE.name}, accueil`}>
+          <LogoMark />
+          <span className="logo__text">{SITE.name}</span>
         </Link>
         <nav className="nav">
           {links.map((link) => (
