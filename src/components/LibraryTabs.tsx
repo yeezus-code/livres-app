@@ -2,18 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isRead } from "@/lib/library";
+import { useLibrary } from "./LibraryProvider";
 
-/** Onglets « Mes livres / Mon top » en haut de la bibliothèque. */
+/** Onglets « Lus / À lire / Mon top » en haut de la bibliothèque. */
 export function LibraryTabs() {
   const pathname = usePathname();
+  const { entries } = useLibrary();
+  const read = entries.filter(isRead).length;
+  const tabs = [
+    { href: "/bibliotheque", label: `Lus · ${read}` },
+    { href: "/a-lire", label: `À lire · ${entries.length - read}` },
+    { href: "/top", label: "Mon top" },
+  ];
   return (
     <nav className="tabs tabs--links" aria-label="Bibliothèque">
-      <Link href="/bibliotheque" className="tab" aria-current={pathname === "/bibliotheque" ? "page" : undefined}>
-        Mes livres
-      </Link>
-      <Link href="/top" className="tab" aria-current={pathname === "/top" ? "page" : undefined}>
-        Mon top
-      </Link>
+      {tabs.map((tab) => (
+        <Link
+          key={tab.href}
+          href={tab.href}
+          className="tab"
+          aria-current={pathname === tab.href ? "page" : undefined}
+        >
+          {tab.label}
+        </Link>
+      ))}
     </nav>
   );
 }

@@ -1273,3 +1273,49 @@ p.with-avatar { display: flex; }
 .prose .lead { font-size: 1.1rem; color: var(--muted); }
 
 .hero + .home-section { margin-top: 2.25rem; }
+
+/* Choix « Je l'ai lu / Je veux le lire » dans la fenêtre d'ajout */
+.tabs--choice { margin-bottom: 1.1rem; }
+.tabs--choice .tab[aria-checked="true"] {
+  background: var(--surface);
+  color: var(--teal-700);
+  box-shadow: var(--shadow);
+}
+
+.input-date {
+  max-width: 14rem;
+}
+
+.tile__date { font-size: 0.8rem; color: var(--muted); }
+
+/* « J'aime » sur les avis */
+.like {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 36px;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.like:hover:not(:disabled) { color: #b0413e; border-color: #e7c3bd; }
+.like--on { color: #b0413e; background: #fbeeec; border-color: #e7c3bd; }
+.like--static { cursor: default; border-color: transparent; padding-inline: 0; background: none; }
+.like--static:hover { color: var(--muted); }
+
+.like-count { color: #b0413e; font-size: 0.8rem; font-weight: 600; }
+
+.entry-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}

@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import type { Book } from "@/lib/books";
 import { BookCover } from "@/components/BookCover";
 import { BookDialog } from "@/components/BookDialog";
+import { isRead } from "@/lib/library";
 import { useLibrary } from "@/components/LibraryProvider";
 import { Stars } from "@/components/StarRating";
 
@@ -101,7 +102,8 @@ function Search() {
                   </p>
                   {entry && (
                     <p className="small in-library">
-                      Dans ma bibliothèque <Stars value={entry.rating} />
+                      {isRead(entry) ? "Dans ma bibliothèque " : "Dans ma liste « À lire »"}
+                      {isRead(entry) && <Stars value={entry.rating} />}
                     </p>
                   )}
                 </div>

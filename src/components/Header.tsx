@@ -16,9 +16,9 @@ const ICONS: Record<string, React.ReactNode> = {
   user: <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5 0-9 2.7-9 6v2h18v-2c0-3.3-4-6-9-6Z" />,
 };
 
-/** L'onglet « Bibliothèque » reste allumé sur la page « Mon top ». */
+/** L'onglet « Bibliothèque » reste allumé sur « À lire » et « Mon top ». */
 function isCurrent(pathname: string, href: string) {
-  if (href === "/bibliotheque") return pathname === href || pathname === "/top";
+  if (href === "/bibliotheque") return ["/bibliotheque", "/a-lire", "/top"].includes(pathname);
   return pathname === href;
 }
 

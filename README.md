@@ -217,6 +217,23 @@ Sans cela, Supabase n'envoie que 2 ou 3 e-mails par heure : impossible de propos
 Test : dans une fenêtre de navigation privée, créez un compte avec une vraie adresse →
 l'e-mail arrive → le lien active le compte. Puis **Se connecter** → **Mot de passe oublié ?**
 
+### Étape 10 — Activer la liste « À lire », la date de lecture et les « j'aime »
+
+Dans Supabase → **SQL Editor** → **New query** : copiez tout le contenu de
+[`supabase/06-a-lire-dates-jaime.sql`](supabase/06-a-lire-dates-jaime.sql), collez-le,
+cliquez **Run**.
+
+### Changer l'adresse du site
+
+- **Gratuit** : Vercel → votre projet → **Settings** → **Domains** → **Add** → saisissez
+  par exemple `codex-lecture.vercel.app` (tout nom libre se terminant par `.vercel.app`).
+- **Nom de domaine à vous** (≈ 10 €/an) : Vercel → **Domains** → **Buy**, puis ajoutez-le
+  au projet de la même façon.
+- **Après chaque changement d'adresse**, dans Supabase → **Authentication** →
+  **URL Configuration** : mettez la nouvelle adresse dans *Site URL* et ajoutez
+  `https://nouvelle-adresse/**` dans *Redirect URLs*. Sinon, les liens des e-mails mèneront
+  à l'ancienne adresse.
+
 > Sans compte, la bibliothèque est liée au navigateur. En se connectant sur un appareil où
 > des livres avaient été ajoutés sans compte, ces livres sont copiés dans le compte.
 
@@ -251,4 +268,8 @@ npm run dev                  # http://localhost:3000
 | `src/app/page.tsx`                      | page d'accueil                                              |
 | `src/app/recherche/page.tsx`            | recherche de livres (`/recherche?q=…`)                      |
 | `src/app/api/classiques/route.ts`       | grands classiques (liste dans `src/lib/classics.ts`)        |
+| `src/lib/site.ts`                       | nom du site, slogan, présentation, adresse de contact      |
+| `src/app/mentions-legales/page.tsx`     | mentions légales                                            |
+| `supabase/06-a-lire-dates-jaime.sql`    | statut lu / à lire, date de lecture, table `review_likes`   |
+| `src/app/a-lire/page.tsx`               | liste « À lire »                                            |
 | `src/lib/avatar.ts`                     | recadrage/réduction des photos avant envoi                  |

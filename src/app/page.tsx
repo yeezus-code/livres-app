@@ -13,6 +13,8 @@ import {
   type Review,
 } from "@/lib/home";
 import { timeAgo } from "@/lib/social";
+import { isRead } from "@/lib/library";
+import { fetchLikeCounts } from "@/lib/likes";
 import { SITE } from "@/lib/site";
 import { getSupabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
@@ -33,6 +35,7 @@ export default function HomePage() {
   const [community, setCommunity] = useState<Community | null>(null);
   const [toAdd, setToAdd] = useState<Book | null>(null);
   const [review, setReview] = useState<Review | null>(null);
+  const [likes, setLikes] = useState<Map<string, number>>(new Map());
 
   // Les grands classiques (ne dépendent pas de Supabase)
   useEffect(() => {
@@ -47,13 +50,17 @@ export default function HomePage() {
     const supabase = getSupabase();
     if (!supabase || status !== "ready") return;
     Promise.all([fetchBestRated(supabase), fetchPopular(supabase), fetchRecentReviews(supabase)])
-      .then(([best, popular, reviews]) => setCommunity({ best, popular, reviews }))
+      .then(async ([best, popular, reviews]) => {
+        setCommunity({ best, popular, reviews });
+        setLikes(await fetchLikeCounts(supabase, reviews.map((r) => r.entry.id)));
+      })
       .catch((e) => {
         console.error(e); // ex. 05-photos-et-accueil.sql pas encore lancé
         setCommunity({ best: [], popular: [], reviews: [] });
       });
   }, [status]);
 
+  const readCount = entries.filter(isRead).length;
   const hasCommunity =
     community && (community.best.length || community.popular.length || community.reviews.length);
 
@@ -73,8 +80,8 @@ export default function HomePage() {
           )}
         </h1>
         <p className="hero__text">
-          {entries.length > 0
-            ? `${entries.length} livre${entries.length > 1 ? "s" : ""} dans votre bibliothèque. Que lisez-vous en ce moment ?`
+          {readCount > 0
+            ? `${readCount} livre${readCount > 1 ? "s" : ""} lu${readCount > 1 ? "s" : ""}. Que lisez-vous en ce moment ?`
             : "Retrouvez un livre, donnez-lui une note sur 5, gardez une trace de ce que vous en avez pensé."}
         </p>
         <form
@@ -164,7 +171,12 @@ export default function HomePage() {
                       <Stars value={r.entry.rating} />
                     </span>
                     <span className="review-card__text">« {r.entry.review} »</span>
-                    <span className="small muted">{timeAgo(r.entry.updated_at)}</span>
+                    <span className="small muted">
+                      {timeAgo(r.entry.updated_at)}
+                      {(likes.get(r.entry.id) ?? 0) > 0 && (
+                        <span className="like-count"> · ♥ {likes.get(r.entry.id)}</span>
+                      )}
+                    </span>
                   </span>
                 </button>
               </li>

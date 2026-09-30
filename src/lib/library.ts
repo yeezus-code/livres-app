@@ -13,6 +13,12 @@ export type LibraryEntry = {
   review: string | null;
   /** Place dans « Mon top » (1 = premier), null si le livre n'y est pas */
   top_position: number | null;
+  /** « lu » (bibliothèque) ou « a_lire » (liste « À lire ») */
+  status?: EntryStatus;
+  /** Date de lecture, au format AAAA-MM-JJ (facultative) */
+  read_on?: string | null;
+  /** Propriétaire (présent quand on lit la bibliothèque de quelqu'un d'autre) */
+  user_id?: string;
   created_at: string;
   updated_at: string;
 };
@@ -20,8 +26,38 @@ export type LibraryEntry = {
 /** Nombre maximum de livres dans « Mon top » */
 export const TOP_SIZE = 10;
 
+export type EntryStatus = "lu" | "a_lire";
+
 /** Ce que l'utilisateur saisit dans le formulaire. */
-export type EntryInput = { rating: number | null; review: string };
+export type EntryInput = {
+  status: EntryStatus;
+  rating: number | null;
+  review: string;
+  /** AAAA-MM-JJ, ou chaîne vide */
+  readOn: string;
+};
+
+/** Le livre a-t-il été lu ? (les fiches d'avant la liste « À lire » sont considérées comme lues) */
+export function isRead(entry: LibraryEntry) {
+  return (entry.status ?? "lu") === "lu";
+}
+
+/** « 2026-03-12 » → « 12 mars 2026 » */
+export function formatDate(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+/** La date du jour au format AAAA-MM-JJ (heure locale) */
+export function today() {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
 
 /** Convertit un livre trouvé par la recherche en ligne de bibliothèque. */
 export function bookToRow(book: Book) {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { Book } from "@/lib/books";
-import type { LibraryEntry } from "@/lib/library";
+import { isRead, type LibraryEntry } from "@/lib/library";
 import { fetchPublicProfile, follow, unfollow, type PublicProfile } from "@/lib/social";
 import { getSupabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
@@ -64,10 +64,12 @@ export default function PublicProfilePage() {
 
   const { profile } = state;
   const isMe = account?.id === profile.id;
-  const top = profile.entries
+  const read = profile.entries.filter(isRead);
+  const toRead = profile.entries.filter((e) => !isRead(e));
+  const top = read
     .filter((e) => e.top_position != null)
     .sort((a, b) => a.top_position! - b.top_position!);
-  const rated = profile.entries.filter((e) => e.rating).length;
+  const rated = read.filter((e) => e.rating).length;
 
   return (
     <>
@@ -77,7 +79,7 @@ export default function PublicProfilePage() {
           <h1 className="page-title profile-head__name">@{profile.username}</h1>
           <p className="muted small profile-head__stats">
             <span>
-              <strong>{profile.entries.length}</strong> livre{profile.entries.length > 1 ? "s" : ""}
+              <strong>{read.length}</strong> lu{read.length > 1 ? "s" : ""}
             </span>
             <span>
               <strong>{rated}</strong> noté{rated > 1 ? "s" : ""}
@@ -115,12 +117,19 @@ export default function PublicProfilePage() {
 
       <section>
         <h2 className="section-title">Bibliothèque</h2>
-        {profile.entries.length === 0 ? (
+        {read.length === 0 ? (
           <p className="muted">Aucun livre pour l&apos;instant.</p>
         ) : (
-          <BookGrid entries={profile.entries} onSelect={setSelected} />
+          <BookGrid entries={read} onSelect={setSelected} />
         )}
       </section>
+
+      {toRead.length > 0 && (
+        <section>
+          <h2 className="section-title">Envie de lire · {toRead.length}</h2>
+          <BookGrid entries={toRead} onSelect={setSelected} />
+        </section>
+      )}
 
       <EntryDialog
         entry={selected}

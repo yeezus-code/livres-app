@@ -12,6 +12,8 @@ import {
   type ActivityItem,
   type Profile,
 } from "@/lib/social";
+import { isRead } from "@/lib/library";
+import { fetchLikeCounts } from "@/lib/likes";
 import { getSupabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
 import { BookCover } from "@/components/BookCover";
@@ -30,6 +32,7 @@ export default function ReadersPage() {
   const [activity, setActivity] = useState<ActivityItem[] | null>(null);
   const [selected, setSelected] = useState<ActivityItem | null>(null);
   const [toAdd, setToAdd] = useState<Book | null>(null);
+  const [likes, setLikes] = useState<Map<string, number>>(new Map());
 
   // Mes abonnements et leur activité
   useEffect(() => {
@@ -39,7 +42,9 @@ export default function ReadersPage() {
       try {
         const people = await fetchFollowing(supabase, account!.id);
         setFollowing(people);
-        setActivity(await fetchActivity(supabase, people));
+        const items = await fetchActivity(supabase, people);
+        setActivity(items);
+        setLikes(await fetchLikeCounts(supabase, items.filter((i) => i.entry.review).map((i) => i.entry.id)));
       } catch (e) {
         console.error(e);
       }
@@ -108,12 +113,17 @@ export default function ReadersPage() {
                       <span className="small with-avatar">
                         <Avatar url={item.author.avatar_url} username={item.author.username} size={20} />
                         <strong>@{item.author.username}</strong>{" "}
-                        <span className="muted">· {timeAgo(item.entry.updated_at)}</span>
+                        <span className="muted">
+                          {isRead(item.entry) ? "a lu" : "veut lire"} · {timeAgo(item.entry.updated_at)}
+                        </span>
                       </span>
                       <span className="feed__title">{item.entry.title}</span>
                       <Stars value={item.entry.rating} />
                       {item.entry.review && (
                         <span className="tile__review">« {item.entry.review} »</span>
+                      )}
+                      {(likes.get(item.entry.id) ?? 0) > 0 && (
+                        <span className="like-count">♥ {likes.get(item.entry.id)}</span>
                       )}
                     </span>
                   </button>

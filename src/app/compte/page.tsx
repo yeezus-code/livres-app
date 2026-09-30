@@ -6,6 +6,7 @@ import { prepareAvatar } from "@/lib/avatar";
 import { Avatar } from "@/components/Avatar";
 import { profileHref } from "@/lib/social";
 import { normalizeUsername, PASSWORD_MIN_LENGTH, toFrenchMessage } from "@/lib/account";
+import { isRead } from "@/lib/library";
 import { useLibrary } from "@/components/LibraryProvider";
 
 type Mode = "signup" | "signin" | "forgot";
@@ -289,7 +290,9 @@ function UsernameForm() {
 function Profile() {
   const { account, entries, signOut } = useLibrary();
   const { busy, error, submit } = useSubmit();
-  const rated = entries.filter((e) => e.rating).length;
+  const read = entries.filter(isRead);
+  const rated = read.filter((e) => e.rating).length;
+  const toRead = entries.length - read.length;
 
   return (
     <div className="narrow">
@@ -299,8 +302,8 @@ function Profile() {
         <p className="profile__name">@{account!.username}</p>
         <p className="muted">{account!.email}</p>
         <p>
-          {entries.length} livre{entries.length > 1 ? "s" : ""} dans la bibliothèque, dont {rated}{" "}
-          noté{rated > 1 ? "s" : ""}.
+          {read.length} livre{read.length > 1 ? "s" : ""} lu{read.length > 1 ? "s" : ""}, dont {rated}{" "}
+          noté{rated > 1 ? "s" : ""} · {toRead} à lire.
         </p>
         <p>
           <Link href={profileHref(account!.username!)}>Voir mon profil public</Link>

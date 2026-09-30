@@ -1,6 +1,6 @@
 "use client";
 
-import type { LibraryEntry } from "@/lib/library";
+import { formatDate, type LibraryEntry } from "@/lib/library";
 import { BookCover } from "./BookCover";
 import { Stars } from "./StarRating";
 
@@ -21,6 +21,7 @@ export function BookGrid({
             <span className="tile__title">{entry.title}</span>
             {entry.authors[0] && <span className="tile__author">{entry.authors[0]}</span>}
             <Stars value={entry.rating} />
+            {entry.read_on && <span className="tile__date">Lu le {formatDate(entry.read_on)}</span>}
             {entry.review && <span className="tile__review">« {entry.review} »</span>}
           </button>
         </li>

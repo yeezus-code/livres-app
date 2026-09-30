@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { TOP_SIZE, type LibraryEntry } from "@/lib/library";
+import { isRead, TOP_SIZE, type LibraryEntry } from "@/lib/library";
 import { BookCover } from "@/components/BookCover";
 import { LibraryTabs } from "@/components/LibraryTabs";
 import { useLibrary } from "@/components/LibraryProvider";
 import { Stars } from "@/components/StarRating";
 
 export default function TopPage() {
-  const { status, entries, setTop } = useLibrary();
+  const { status, entries: allEntries, setTop } = useLibrary();
+  // Seuls les livres lus peuvent entrer dans le top
+  const entries = useMemo(() => allEntries.filter(isRead), [allEntries]);
   /** null = on regarde le top ; sinon = liste en cours de modification */
   const [draft, setDraft] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -44,8 +46,8 @@ export default function TopPage() {
         <LibraryTabs />
         <h1 className="page-title">Mon top</h1>
         <div className="empty">
-          <p>Ajoutez d&apos;abord des livres à votre bibliothèque pour composer votre top.</p>
-          <Link href="/" className="btn btn--primary">
+          <p>Ajoutez d&apos;abord des livres lus à votre bibliothèque pour composer votre top.</p>
+          <Link href="/recherche" className="btn btn--primary">
             Rechercher un livre
           </Link>
         </div>

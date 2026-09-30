@@ -71,6 +71,8 @@ export function toFrenchMessage(error: unknown): string {
     case "over_request_rate_limit":
     case "over_email_send_rate_limit":
       return "Trop de tentatives. Patientez quelques minutes puis réessayez.";
+    case "PGRST204": // colonne absente
+      return "La base n'est pas à jour : lancez le dernier fichier SQL du README dans Supabase.";
     case "42P01": // table absente
     case "PGRST205":
       return "La table des comptes n'existe pas encore : lancez 02-comptes.sql (README, étape 5).";

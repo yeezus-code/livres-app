@@ -174,14 +174,26 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const save = useCallback(async (book: Book, input: EntryInput) => {
-    const { data, error } = await requireSupabase()
-      .from("library_entries")
-      .upsert(
-        { ...bookToRow(book), rating: input.rating, review: input.review.trim() || null },
-        { onConflict: "user_id,book_id" },
-      )
-      .select()
-      .single();
+    const supabase = requireSupabase();
+    const upsert = (row: Record<string, unknown>) =>
+      supabase
+        .from("library_entries")
+        .upsert({ ...bookToRow(book), ...row }, { onConflict: "user_id,book_id" })
+        .select()
+        .single();
+
+    const readFields = { rating: input.rating, review: input.review.trim() || null };
+    let { data, error } = await upsert(
+      input.status === "a_lire"
+        ? // Un livre « à lire » n'a encore ni note, ni avis, ni date, ni place dans le top
+          { status: "a_lire", rating: null, review: null, read_on: null, top_position: null }
+        : { status: "lu", ...readFields, read_on: input.readOn || null },
+    );
+    // Base pas encore mise à jour (06-a-lire-dates-jaime.sql pas lancé) : on enregistre
+    // au moins la note et l'avis, comme avant.
+    if (error?.code === "PGRST204" && input.status === "lu") {
+      ({ data, error } = await upsert(readFields));
+    }
     if (error) throw error;
 
     const saved = data as LibraryEntry;
@@ -260,9 +272,12 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       if (pending.length) {
-        const rows = pending.map(({ book_id, title, authors, cover_url, genres, year, rating, review }) => ({
-          book_id, title, authors, cover_url, genres, year, rating, review,
-        }));
+        const rows = pending.map(
+          ({ book_id, title, authors, cover_url, genres, year, rating, review, status, read_on }) => ({
+            book_id, title, authors, cover_url, genres, year, rating, review,
+            status: status ?? "lu", read_on: read_on ?? null,
+          }),
+        );
         // Un livre déjà présent dans le compte n'est pas écrasé
         const { error: copyError } = await supabase
           .from("library_entries")

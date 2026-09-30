@@ -3,21 +3,24 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Book } from "@/lib/books";
-import { entryToBook } from "@/lib/library";
+import { entryToBook, isRead } from "@/lib/library";
 import { BookDialog } from "@/components/BookDialog";
 import { BookGrid } from "@/components/BookGrid";
 import { LibraryTabs } from "@/components/LibraryTabs";
 import { useLibrary } from "@/components/LibraryProvider";
 
-type Sort = "recent" | "rating" | "title";
+type Sort = "recent" | "read" | "rating" | "title";
 
 export default function LibraryPage() {
-  const { status, entries, account } = useLibrary();
+  const { status, entries: allEntries, account } = useLibrary();
+  const entries = useMemo(() => allEntries.filter(isRead), [allEntries]);
   const [sort, setSort] = useState<Sort>("recent");
   const [selected, setSelected] = useState<Book | null>(null);
 
   const sorted = useMemo(() => {
     const list = [...entries];
+    // Date de lecture : les plus récentes d'abord, les livres sans date à la fin
+    if (sort === "read") list.sort((a, b) => (b.read_on ?? "").localeCompare(a.read_on ?? ""));
     if (sort === "rating") list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     if (sort === "title") list.sort((a, b) => a.title.localeCompare(b.title, "fr"));
     return list; // « recent » : déjà dans l'ordre d'ajout
@@ -37,6 +40,7 @@ export default function LibraryPage() {
             <span className="visually-hidden">Trier par</span>
             <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
               <option value="recent">Ajout récent</option>
+              <option value="read">Date de lecture</option>
               <option value="rating">Meilleure note</option>
               <option value="title">Titre (A→Z)</option>
             </select>
@@ -54,8 +58,8 @@ export default function LibraryPage() {
 
       {entries.length === 0 ? (
         <div className="empty">
-          <p>Votre bibliothèque est vide pour l&apos;instant.</p>
-          <Link href="/" className="btn btn--primary">
+          <p>Aucun livre lu pour l&apos;instant.</p>
+          <Link href="/recherche" className="btn btn--primary">
             Rechercher un livre
           </Link>
         </div>

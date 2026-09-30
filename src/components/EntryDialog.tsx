@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { entryToBook, type LibraryEntry } from "@/lib/library";
+import { entryToBook, formatDate, isRead, type LibraryEntry } from "@/lib/library";
 import type { Book } from "@/lib/books";
 import { profileHref, type Profile } from "@/lib/social";
 import { Avatar } from "./Avatar";
 import { BookCover } from "./BookCover";
+import { LikeButton } from "./LikeButton";
 import { useLibrary } from "./LibraryProvider";
 import { Stars } from "./StarRating";
 
@@ -61,14 +62,29 @@ export function EntryDialog({
           {author && (
             <p className="small muted with-avatar">
               <Avatar url={author.avatar_url} username={author.username} size={24} />
-              Avis de <Link href={profileHref(author.username)}>@{author.username}</Link>
+              {isRead(entry) ? "Avis de" : "Dans la liste « À lire » de"}{" "}
+              <Link href={profileHref(author.username)}>@{author.username}</Link>
             </p>
           )}
-          {entry.rating ? <Stars value={entry.rating} /> : <p className="muted">Pas de note</p>}
-          {entry.review ? (
-            <blockquote className="review">{entry.review}</blockquote>
-          ) : (
-            <p className="muted small">Pas d&apos;avis écrit.</p>
+          {isRead(entry) && (
+            <>
+              <div className="entry-meta">
+                {entry.rating ? <Stars value={entry.rating} /> : <span className="muted">Pas de note</span>}
+                {entry.read_on && (
+                  <span className="small muted">Lu le {formatDate(entry.read_on)}</span>
+                )}
+              </div>
+              {entry.review ? (
+                <>
+                  <blockquote className="review">{entry.review}</blockquote>
+                  <p>
+                    <LikeButton entryId={entry.id} ownerId={entry.user_id} />
+                  </p>
+                </>
+              ) : (
+                <p className="muted small">Pas d&apos;avis écrit.</p>
+              )}
+            </>
           )}
 
           <div className="dialog__actions">
