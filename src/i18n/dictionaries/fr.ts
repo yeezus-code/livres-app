@@ -201,6 +201,10 @@ export const fr = {
     addToLibrary: "Ajouter à ma bibliothèque",
     ratingOutOf5: "Note sur 5",
     starLabel: { one: "{n} étoile", other: "{n} étoiles" },
+    coverChange: "Changer la couverture",
+    coverKeep: "Garder cette couverture",
+    coverNone: "Aucune autre couverture trouvée pour ce livre.",
+    coverNoImage: "Sans image (couverture avec le titre)",
   },
 
   like: {

@@ -11,7 +11,7 @@ export function BookCover({ src: rawSrc, title, size = "md" }: Props) {
   const [failed, setFailed] = useState(false);
   const { t, f } = useI18n();
   // Grande couverture : on demande la version haute définition à Open Library
-  const src = size === "lg" && rawSrc ? rawSrc.replace(/-M\.jpg$/, "-L.jpg") : rawSrc;
+  const src = size === "lg" && rawSrc ? rawSrc.replace(/-M\.jpg(\?|$)/, "-L.jpg$1") : rawSrc;
 
   if (!src || failed) {
     return (

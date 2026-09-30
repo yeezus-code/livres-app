@@ -195,6 +195,10 @@ export const es: Dictionary = {
     addToLibrary: "Añadir a mi biblioteca",
     ratingOutOf5: "Nota sobre 5",
     starLabel: { one: "{n} estrella", other: "{n} estrellas" },
+    coverChange: "Cambiar la portada",
+    coverKeep: "Mantener esta portada",
+    coverNone: "No se ha encontrado ninguna otra portada para este libro.",
+    coverNoImage: "Sin imagen (portada con el título)",
   },
 
   like: {

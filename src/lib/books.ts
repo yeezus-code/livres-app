@@ -27,8 +27,12 @@ const SOURCE_LANGS: Record<Locale, { openLibrary: string; edition: string; googl
   pt: { openLibrary: "pt", edition: "por", google: "pt" },
 };
 
-/** Un résultat, avec « localized » = titre et couverture pris dans une édition de la bonne langue. */
-type Found = Book & { localized: boolean };
+/**
+ * Un résultat, avec :
+ * - « localized » : la couverture vient d'une édition dans la langue du visiteur ;
+ * - « isbn » : un numéro ISBN de l'édition (pour chercher une couverture en dernier recours).
+ */
+type Found = Book & { localized: boolean; isbn?: string };
 
 // ---------------------------------------------------------------------------
 // Genres : les deux sources renvoient des « sujets » en anglais, souvent très
@@ -183,15 +187,23 @@ type GoogleVolume = {
     authors?: string[];
     publishedDate?: string;
     categories?: string[];
+    language?: string;
     imageLinks?: { thumbnail?: string; smallThumbnail?: string };
+    industryIdentifiers?: { type: string; identifier: string }[];
   };
 };
 
-function googleCover(links: GoogleVolume["volumeInfo"]["imageLinks"]): string | null {
+export function googleCover(links: GoogleVolume["volumeInfo"]["imageLinks"]): string | null {
   const raw = links?.thumbnail ?? links?.smallThumbnail;
   if (!raw) return null;
-  // Google renvoie des liens http avec un effet « page cornée » : on corrige les deux
-  return raw.replace(/^http:/, "https:").replace("&edge=curl", "");
+  // Google renvoie des liens http, avec un effet « page cornée » et en toute petite taille
+  // (128 pixels de large, flou sur les écrans de téléphone) : on corrige les trois
+  return raw.replace(/^http:/, "https:").replace("&edge=curl", "") + "&fife=w400-h600";
+}
+
+function googleIsbn(info: GoogleVolume["volumeInfo"]): string | undefined {
+  const ids = info.industryIdentifiers ?? [];
+  return (ids.find((i) => i.type === "ISBN_13") ?? ids.find((i) => i.type === "ISBN_10"))?.identifier;
 }
 
 async function searchGoogleBooks(query: Query, locale: Locale): Promise<Found[]> {
@@ -228,7 +240,9 @@ async function searchGoogleBooks(query: Query, locale: Locale): Promise<Found[]>
         coverUrl: googleCover(info.imageLinks),
         genres: toGenres(info.categories),
         year: Number.isNaN(year) ? null : year,
-        localized: true,
+        // Sans « langue » connue, on fait confiance au filtre de langue (sélections)
+        localized: (info.language ?? SOURCE_LANGS[locale].google) === SOURCE_LANGS[locale].google,
+        isbn: googleIsbn(info),
       };
     });
 }
@@ -236,28 +250,46 @@ async function searchGoogleBooks(query: Query, locale: Locale): Promise<Found[]>
 // ---------------------------------------------------------------------------
 // Fusion des deux sources
 // ---------------------------------------------------------------------------
+/**
+ * La meilleure couverture parmi plusieurs éditions du même livre :
+ * 1. une édition dans la langue du visiteur (Open Library d'abord, puis Google) ;
+ * 2. sinon n'importe quelle couverture (Open Library d'abord) ;
+ * 3. sinon la couverture Open Library retrouvée grâce au numéro ISBN (si elle existe).
+ */
+function bestCover(editions: Found[]): string | null {
+  const withCover = editions.filter((e) => e.coverUrl);
+  const cover = (withCover.find((e) => e.localized) ?? withCover[0])?.coverUrl;
+  if (cover) return cover;
+  const isbn = editions.find((e) => e.isbn)?.isbn;
+  // « default=false » : pas d'image grise si Open Library n'a rien (la fiche affiche alors le titre)
+  return isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false` : null;
+}
+
 export function mergeResults(openLibrary: Found[], google: Found[]): Book[] {
   const usedGoogle = new Set<string>();
 
-  // 1. On complète les résultats Open Library avec Google : genres, et couverture si Open
-  //    Library n'en a pas dans la bonne langue (Google ne renvoie que des éditions de cette langue)
+  // 1. On complète les résultats Open Library avec toutes les éditions Google du même livre :
+  //    genres, et meilleure couverture
   const merged: Found[] = openLibrary.map((book) => {
-    const match = google.find((g) => !usedGoogle.has(g.id) && sameBook(book, g));
-    if (!match) return book;
-    usedGoogle.add(match.id);
+    const matches = google.filter((g) => !usedGoogle.has(g.id) && sameBook(book, g));
+    if (!matches.length) return book;
+    matches.forEach((g) => usedGoogle.add(g.id));
     return {
       ...book,
-      coverUrl: book.localized ? book.coverUrl : (match.coverUrl ?? book.coverUrl),
-      genres: dropGenericGenre([...new Set([...book.genres, ...match.genres])]).slice(0, 3),
+      coverUrl: bestCover([book, ...matches]),
+      localized: book.localized || matches.some((g) => g.localized && g.coverUrl),
+      genres: dropGenericGenre([...new Set([...book.genres, ...matches.flatMap((g) => g.genres)])]).slice(0, 3),
     };
   });
 
-  // 2. On ajoute les livres que seul Google connaît (sans doublons)
-  for (const g of google) {
+  // 2. On ajoute les livres que seul Google connaît : une seule fois par livre, avec la
+  //    meilleure couverture parmi ses éditions
+  const googleOnly = google.filter((g) => !usedGoogle.has(g.id));
+  for (const g of googleOnly) {
     if (merged.length >= MAX_RESULTS) break;
-    if (usedGoogle.has(g.id)) continue;
     if (merged.some((b) => sameBook(b, g))) continue;
-    merged.push(g);
+    const editions = googleOnly.filter((other) => sameBook(g, other));
+    merged.push({ ...g, coverUrl: bestCover(editions) });
   }
 
   // 3. Les livres avec couverture d'abord (l'ordre de pertinence est conservé sinon)
@@ -367,4 +399,71 @@ export async function latestReleases(locale: Locale, max = 18): Promise<Book[]> 
     if (books.length >= max) break;
   }
   return books;
+}
+
+// ---------------------------------------------------------------------------
+// Couvertures possibles d'un livre (pour que le lecteur choisisse la sienne)
+// ---------------------------------------------------------------------------
+export type CoverChoice = { url: string; localized: boolean };
+
+type OpenLibraryEditionEntry = { covers?: number[]; languages?: { key: string }[] };
+
+/** Les couvertures des éditions d'un livre, celles dans la langue du visiteur d'abord. */
+export async function findCovers(
+  book: { id: string; title: string; author?: string },
+  locale: Locale,
+): Promise<CoverChoice[]> {
+  const langs = SOURCE_LANGS[locale];
+
+  const openLibrary = async (): Promise<CoverChoice[]> => {
+    if (!book.id.startsWith("ol:")) return [];
+    const work = book.id.slice(3).replace(/[^A-Za-z0-9]/g, "");
+    const res = await fetch(`https://openlibrary.org/works/${work}/editions.json?limit=100`, {
+      headers: { "User-Agent": "CodexApp/0.1 (carnet de lecture en ligne)" },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error(`Open Library a répondu ${res.status}`);
+    const data: { entries?: OpenLibraryEditionEntry[] } = await res.json();
+    return (data.entries ?? [])
+      .filter((e) => e.covers?.[0] && e.covers[0] > 0) // -1 : couverture supprimée
+      .map((e) => ({
+        url: coverFromId(e.covers![0]),
+        localized: Boolean(e.languages?.some((l) => l.key === `/languages/${langs.edition}`)),
+      }));
+  };
+
+  const google = async (): Promise<CoverChoice[]> => {
+    const url = new URL("https://www.googleapis.com/books/v1/volumes");
+    url.searchParams.set(
+      "q",
+      `intitle:${book.title}` + (book.author ? ` inauthor:${book.author}` : ""),
+    );
+    url.searchParams.set("maxResults", "40");
+    url.searchParams.set("printType", "books");
+    const key = process.env.GOOGLE_BOOKS_API_KEY;
+    if (key) url.searchParams.set("key", key);
+    const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    if (!res.ok) throw new Error(`Google Books a répondu ${res.status}`);
+    const data: { items?: GoogleVolume[] } = await res.json();
+    const wanted = { title: book.title, authors: book.author ? [book.author] : [] } as Book;
+    return (data.items ?? [])
+      .filter((item) => item.volumeInfo.imageLinks && item.volumeInfo.title)
+      // Seulement le même livre (pas les guides de lecture, résumés…)
+      .filter((item) =>
+        sameBook(wanted, { title: item.volumeInfo.title!, authors: item.volumeInfo.authors ?? [] } as Book),
+      )
+      .map((item) => ({
+        url: googleCover(item.volumeInfo.imageLinks)!,
+        localized: item.volumeInfo.language === langs.google,
+      }));
+  };
+
+  const [ol, gb] = await Promise.allSettled([openLibrary(), google()]);
+  const all = [
+    ...(ol.status === "fulfilled" ? ol.value : []),
+    ...(gb.status === "fulfilled" ? gb.value : []),
+  ];
+  const unique = [...new Map(all.map((c) => [c.url, c])).values()];
+  // Langue du visiteur d'abord (l'ordre des sources est conservé sinon)
+  return unique.sort((a, b) => Number(b.localized) - Number(a.localized)).slice(0, 36);
 }
