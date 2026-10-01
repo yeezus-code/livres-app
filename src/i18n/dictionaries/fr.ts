@@ -39,7 +39,7 @@ export const fr = {
     library: "Bibliothèque",
     libraryShort: "Biblio",
     readers: "Lecteurs",
-    readersShort: "Mes abonnements",
+    readersShort: "Mes abos",
     account: "Compte",
     accountShort: "Compte",
     me: "Moi",
