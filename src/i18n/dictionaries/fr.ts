@@ -283,6 +283,15 @@ export const fr = {
     backToAccount: "Retour au compte",
     newPasswordTitle: "Nouveau mot de passe",
     chooseNewPassword: "Choisissez un nouveau mot de passe",
+    confirmTitle: "Confirmer votre adresse",
+    confirmIntro: "Dernière étape : touchez le bouton pour activer votre compte.",
+    confirmButton: "Confirmer mon adresse",
+    recoveryIntro: "Touchez le bouton pour choisir un nouveau mot de passe.",
+    continue: "Continuer",
+    maybeConfirmed:
+      "Votre adresse est peut-être déjà confirmée : essayez de vous connecter avec votre e-mail et votre mot de passe.",
+    recoveryHint: "Demandez un nouveau lien avec « Mot de passe oublié ? ».",
+    signIn: "Se connecter",
   },
 
   readers: {

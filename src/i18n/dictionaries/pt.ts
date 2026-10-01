@@ -277,6 +277,15 @@ export const pt: Dictionary = {
     backToAccount: "Voltar para a conta",
     newPasswordTitle: "Nova senha",
     chooseNewPassword: "Escolha uma nova senha",
+    confirmTitle: "Confirme seu e-mail",
+    confirmIntro: "Última etapa: toque no botão para ativar sua conta.",
+    confirmButton: "Confirmar meu e-mail",
+    recoveryIntro: "Toque no botão para escolher uma nova senha.",
+    continue: "Continuar",
+    maybeConfirmed:
+      "Seu e-mail talvez já esteja confirmado: tente entrar com seu e-mail e sua senha.",
+    recoveryHint: "Peça um novo link em “Esqueceu a senha?”.",
+    signIn: "Entrar",
   },
 
   readers: {
