@@ -36,7 +36,7 @@ export const pt: Dictionary = {
     library: "Biblioteca",
     libraryShort: "Estante",
     readers: "Leitores",
-    readersShort: "Leitores",
+    readersShort: "Seguindo",
     account: "Conta",
     accountShort: "Conta",
     me: "Eu",

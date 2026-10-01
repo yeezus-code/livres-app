@@ -174,9 +174,9 @@ textarea {
     bottom: 0;
     z-index: 20;
     margin: 0;
-    display: grid;
-    grid-auto-columns: 1fr;
-    grid-auto-flow: column;
+    /* Onglets de largeur souple : un libellé plus long (« Mes abonnements ») prend plus de place */
+    display: flex;
+    justify-content: space-between;
     background: var(--ink);
     border-top: 1px solid rgb(236 194 103 / 0.25);
     padding: 0.35rem 0.35rem calc(0.35rem + env(safe-area-inset-bottom));
@@ -196,7 +196,9 @@ textarea {
   .nav__icon { display: block; }
   .nav__avatar { margin: 0; }
   .nav__label { display: none; }
-  .nav__short { display: block; }
+  /* Un libellé trop long (« Mes abonnements ») passe sur deux lignes, centré */
+  .nav__short { display: block; text-align: center; line-height: 1.15; white-space: normal; }
+  .nav__link { flex: 1 1 auto; min-width: 0; }
 
   body { padding-bottom: calc(4.3rem + env(safe-area-inset-bottom)); }
   .sticky-actions { bottom: calc(4rem + env(safe-area-inset-bottom)); }
